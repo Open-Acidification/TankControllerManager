@@ -19,9 +19,10 @@ jobs:
         python-version: '3.x'
     - name: Install Dependencies
       run: |
+        cd oa_server
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run Tests
+    - name: Run Unit Tests
       run: |
         cd oa_server
         python manage.py test

@@ -1,4 +1,0 @@
-Django
-djangorestframework
-django-lint
-psycopg2
