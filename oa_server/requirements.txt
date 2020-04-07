@@ -1,5 +1,6 @@
 Django
 pylint-django
+pylint-exit
 djangorestframework
 psycopg2-binary
 coverage

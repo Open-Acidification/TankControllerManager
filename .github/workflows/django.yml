@@ -25,7 +25,7 @@ jobs:
     - name: Run Linter
       run: |
         cd oa_server
-        pylint -d C0114,C0115,C0116,W0611 --load-plugins pylint_django devices frontend oa_server time_series
+        pylint -d C0114,C0115,C0116,W0611 --load-plugins pylint_django devices frontend oa_server time_series || pylint-exit -efail -rfail -cfail $?
     - name: Run Unit Tests
       run: |
         cd oa_server
