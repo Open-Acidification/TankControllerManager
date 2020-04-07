@@ -2,3 +2,4 @@ Django
 pylint-django
 djangorestframework
 psycopg2-binary
+coverage

@@ -22,7 +22,21 @@ jobs:
         cd oa_server
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Run Linter
+      run: |
+        cd oa_server
+        pylint --load-plugins pylint_django devices frontend oa_server time_series
     - name: Run Unit Tests
       run: |
         cd oa_server
         python manage.py test
+    - name: Coverage
+      run: |
+        cd oa_server
+        python -m coverage run --source='.' manage.py test oa_server
+        python -m coverage html
+    - name: Upload Coverage
+        uses: actions/upload-artifact@v1
+        with:
+          name: coverage
+          path: oa_server/htmlcov
