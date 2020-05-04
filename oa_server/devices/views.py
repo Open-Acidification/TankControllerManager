@@ -36,13 +36,13 @@ def device_list(request):
             if not re.match("[0-9a-f]{2}(:)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
                 raise ValueError(f"The returned MAC address \"{mac}\" is invalid")
 
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.ConnectionError:
             return HttpResponse(f"The specified IP address {address} is invalid", status=421)
         except requests.exceptions.Timeout:
             return HttpResponse(f"The specified IP address {address}" + \
                 " could not be reached in time", status=421)
-        except ValueError as e:
-            return HttpResponse(e, status=421)
+        except ValueError as err:
+            return HttpResponse(err, status=421)
 
         name = request.POST.get('name', default='Unnamed')
         notes = request.POST.get('notes', default='N/A')
