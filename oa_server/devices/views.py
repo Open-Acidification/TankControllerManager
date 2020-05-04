@@ -1,7 +1,5 @@
 import os
 import csv
-import platform
-import subprocess
 import re
 from datetime import datetime
 import requests
@@ -140,14 +138,3 @@ def manage_data(request, mac):
 
 
     return response
-
-def ping(host):
-    if host is None:
-        return False
-
-    # Chooses appropriate parameter depending on the platform
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-
-    command = ['ping', param, '1', host]
-
-    return subprocess.call(command) == 0
