@@ -1,5 +1,8 @@
 import os
 import csv
+import requests
+import platform
+import subprocess
 from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -16,9 +19,19 @@ from devices.serializers import DeviceSerializer, DatumSerializer
 def device_list(request):
     # Save the specified device
     if request.method == 'POST':
+        # Get the IP address. We'll verify its validity when we check the MAC
+        address = request.POST.get('ip', default=None)
+
+        # Get the MAC address, or return an error if the IP can't be reached
+        try:
+            request = requests.get('http://'+address+'/mac', timeout=0.1)
+            if (request.status_code != 202):
+                raise requests.exceptions.ConnectionError("Got status code "+request.status_code+"; expected 202")
+            mac = request.text.partition('\n')[0]
+        except:
+            return HttpResponse("The specified IP address is invalid", status=421) 
+ 
         name = request.POST.get('name', default='Unnamed')
-        address = request.POST.__getitem__('ip')
-        mac = '000000000001' # TODO: Get this information from the device.
         notes = request.POST.get('notes', default='N/A')
 
         data = {'name': name, 'ip': address, 'mac': mac, 'notes': notes}
@@ -114,3 +127,14 @@ def manage_data(request, mac):
 
 
     return response
+
+def ping(host):
+    if host == None:
+        return False
+
+    # Chooses appropriate parameter depending on the platform
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+
+    command = ['ping', param, '1', host]
+
+    return subprocess.call(command) == 0
