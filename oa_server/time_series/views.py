@@ -9,8 +9,24 @@ from time_series.serializers import TimeSeriesSerializer
 
 
 @csrf_exempt
+@require_http_methods(["GET"])
+def time_series_list(request, ts_type=''):
+    ts_type = sanitize_ts_type(ts_type)
+
+    # Return a list of all time series of the specified parameter
+    if ts_type == 'P':
+        series = TimeSeries.objects.get(ts_type='P')
+    elif ts_type == 'T':
+        series = TimeSeries.objects.get(ts_type='T')
+    else:
+        series = TimeSeries.objects.all()
+
+    ts_serializer = TimeSeriesSerializer(series, many=True)
+    return JsonResponse(ts_serializer.data, safe=False)
+
+@csrf_exempt
 @require_http_methods(["GET", "POST"])
-def time_series_list(request):
+def time_series_save(request):
     # Save the provided time series
     if request.method == 'POST':
         data = JSONParser().parse(request)
@@ -19,11 +35,9 @@ def time_series_list(request):
             ts_serializer.save()
             return JsonResponse(ts_serializer.data, status=201)
         return JsonResponse(ts_serializer.errors, status=400)
-
-    # Return a list of all time series (GET)
-    series = TimeSeries.objects.all()
-    ts_serializer = TimeSeriesSerializer(series, many=True)
-    return JsonResponse(ts_serializer.data, safe=False)
+    
+    # Return a list of all time series of the specified type (GET)
+    return time_series_list(request)
 
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
@@ -150,3 +164,17 @@ def time_series_generate_sine(request):
 def point_in_wave(point_x, frequency, amplitude, offset_x, offset_y):
     """Returns the specified point x in the wave of specified parameters."""
     return (math.sin((math.pi * point_x)/frequency + offset_x) * amplitude) + offset_y
+
+def sanitize_ts_type(ts_type):
+    # Make type case-insensitive
+    ts_type = ts_type.lower()
+
+    # Change type to character code
+    if ts_type == 'ph':
+        ts_type = 'P'
+    elif ts_type == 'temp' or ts_type == "temperature":
+        ts_type = 'T'
+    else:
+        ts_type = ''
+
+    return ts_type
