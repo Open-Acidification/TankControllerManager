@@ -1,8 +1,8 @@
 import os
 import csv
-import requests
 import platform
 import subprocess
+import re
 from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -12,6 +12,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
+import requests
 
 
 @csrf_exempt
@@ -24,13 +25,25 @@ def device_list(request):
 
         # Get the MAC address, or return an error if the IP can't be reached
         try:
-            request = requests.get('http://'+address+'/mac', timeout=0.1)
-            if (request.status_code != 202):
-                raise requests.exceptions.ConnectionError("Got status code "+request.status_code+"; expected 202")
-            mac = request.text.partition('\n')[0]
-        except:
-            return HttpResponse("The specified IP address is invalid", status=421) 
- 
+            mac = requests.get(f"http://{address}/mac", timeout=2)
+            # Fail if API call yields wrong status code
+            if mac.status_code != 200:
+                raise ValueError(f"Received response code {mac.status_code}; expected 200")
+
+            # Get everything before line break
+            mac = mac.text.partition('\n')[0].strip().lower()
+            # Fail if returned MAC is of invalid format
+            if not re.match("[0-9a-f]{2}(:)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
+                raise ValueError(f"The returned MAC address \"{mac}\" is invalid")
+
+        except requests.exceptions.ConnectionError as e:
+            return HttpResponse(f"The specified IP address {address} is invalid", status=421)
+        except requests.exceptions.Timeout:
+            return HttpResponse(f"The specified IP address {address}" + \
+                " could not be reached in time", status=421)
+        except ValueError as e:
+            return HttpResponse(e, status=421)
+
         name = request.POST.get('name', default='Unnamed')
         notes = request.POST.get('notes', default='N/A')
 
@@ -129,11 +142,11 @@ def manage_data(request, mac):
     return response
 
 def ping(host):
-    if host == None:
+    if host is None:
         return False
 
     # Chooses appropriate parameter depending on the platform
-    param = '-n' if platform.system().lower()=='windows' else '-c'
+    param = '-n' if platform.system().lower() == 'windows' else '-c'
 
     command = ['ping', param, '1', host]
 
