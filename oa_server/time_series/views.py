@@ -14,12 +14,10 @@ def time_series_list(request, ts_type=''):
     ts_type = sanitize_ts_type(ts_type)
 
     # Return a list of all time series of the specified parameter
-    if ts_type == 'P':
-        series = TimeSeries.objects.get(ts_type='P')
-    elif ts_type == 'T':
-        series = TimeSeries.objects.get(ts_type='T')
-    else:
+    if ts_type == '':
         series = TimeSeries.objects.all()
+    else:
+        series = TimeSeries.objects.filter(type=ts_type)
 
     ts_serializer = TimeSeriesSerializer(series, many=True)
     return JsonResponse(ts_serializer.data, safe=False)
@@ -35,7 +33,7 @@ def time_series_save(request):
             ts_serializer.save()
             return JsonResponse(ts_serializer.data, status=201)
         return JsonResponse(ts_serializer.errors, status=400)
-    
+
     # Return a list of all time series of the specified type (GET)
     return time_series_list(request)
 
@@ -172,7 +170,7 @@ def sanitize_ts_type(ts_type):
     # Change type to character code
     if ts_type == 'ph':
         ts_type = 'P'
-    elif ts_type == 'temp' or ts_type == "temperature":
+    elif ts_type in ('temp', 'temperature'):
         ts_type = 'T'
     else:
         ts_type = ''
