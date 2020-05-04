@@ -3,6 +3,7 @@ import csv
 import platform
 import subprocess
 import re
+import requests
 from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -12,7 +13,6 @@ from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
-import requests
 
 
 @csrf_exempt
