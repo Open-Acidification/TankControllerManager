@@ -1,4 +1,3 @@
-import os
 import csv
 import re
 from datetime import datetime
@@ -92,26 +91,27 @@ def manage_data(request, mac):
     try:
         device = Device.objects.get(mac=mac)
     except Device.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse("There is no device with the specified MAC address.", status=404)
 
 
     ### Read the specified device's data (GET) ###
 
     # Query database #
     min_time = request.GET.get('start', default=datetime.min)
-    max_time = request.GET.get('end', default=datetime.now())
+    max_time = request.GET.get('end', default=datetime.utcnow())
 
     # Convert parameters to datetime if not already
     try:
-        min_time = datetime.strptime(min_time, "%m%d%y_%H%M%S")
+        min_time = datetime.strptime(min_time, '%y%m%d_%H%M%S')
     except TypeError:
         pass
     try:
-        max_time = datetime.strptime(max_time, "%m%d%y_%H%M%S")
+        max_time = datetime.strptime(max_time, '%y%m%d_%H%M%S')
     except TypeError:
         pass
 
-    data = Datum.objects.filter(device=device, time__range=[min_time, max_time]).values()
+    data = Datum.objects.\
+        filter(device=device, time__range=[min_time, max_time]).order_by('time').values()
 
     response = HttpResponse(content_type='text/plain')
 
@@ -119,22 +119,22 @@ def manage_data(request, mac):
 
     if download: # Download our file with a unique name
         response['Content-Disposition'] = 'attachment; filename=' + \
-        '"device-'+mac+' start-'+min_time.strftime("%m%d%y_%H%M%S")+\
-        ' end-'+max_time.strftime("%m%d%y_%H%M%S")+'.csv"'
+        '"device-'+mac+' start-'+min_time.strftime('%y%m%d_%H%M%S')+\
+        ' end-'+max_time.strftime('%y%m%d_%H%M%S')+'.csv"'
 
     # Set up CSV writer
     fieldnames = ['time', 'tankid', 'temp', 'temp_setpoint', 'pH', \
         'pH_setpoint', 'on_time', 'Kp', 'Ki', 'Kd']
     writer = csv.DictWriter(response, fieldnames, extrasaction='ignore')
 
-    # Write CSV
+    # CSV Writing
     # Write custom header
     writer.writerow({'time':'time', 'tankid':'tankid', 'temp':'temp', \
         'temp_setpoint':'temp setpoint', 'pH':'pH', 'pH_setpoint':'pH setpoint', \
         'on_time':'onTime', 'Kp':'Kp', 'Ki':'Ki', 'Kd':'Kd'})
+    # Write data
     for datum in data:
-        datum['time'] = datum['time'].strftime("%m/%d/%Y %H:%M:%S")
+        datum['time'] = datum['time'].strftime('%Y/%m/%d %H:%M:%S:%f')
         writer.writerow(datum)
-
 
     return response
