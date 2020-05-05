@@ -1,10 +1,10 @@
 import platform
 import subprocess
 from datetime import datetime
-import pytz
 from contextlib import closing
 import json
 import csv
+import pytz
 import requests
 from django.db import models
 
@@ -112,7 +112,7 @@ def json_to_object(address):
         json.JSONDecodeError, ValueError):
         return None
 
-# pylint: disable=R0912
+# pylint: disable=R0912,R0914
 # TODO: Refactor this to use recursion
 def load_data(device, start_at=datetime.min):
     """
