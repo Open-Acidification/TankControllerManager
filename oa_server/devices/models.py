@@ -14,15 +14,21 @@ class Device(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
     notes = models.TextField()
-    download_task = models.CharField(max_length=64, default="")
+    download_task = models.CharField(max_length=32, default="")
     last_refreshed = models.DateTimeField(auto_now=False, default=datetime.min)
 
     @property
     def online(self):
         return ping(self.ip)
 
-    def refresh_data(self):
-        load_data_async(self, self.last_refreshed)
+    def refresh_data(self, start_at=None, reload_data=False):
+        if start_at is None:
+            # We can't use self for default argument
+            start_at = self.last_refreshed
+        # If the lock didn't get released but the task is finished, ignore it
+        if self.download_task == "" or result(self.download_task) is not None:
+            self.download_task = async_task(load_data, hook=self.finish_download, \
+                device=self, start_at=start_at, reload_data=reload_data)
 
     def finish_download(self, task):
         self.download_task = ""
@@ -197,9 +203,3 @@ def load_data(device, start_at=datetime.min, reload_data=False):
                     # Load the CSV
                     imported_everything = imported_everything and load_csv(hour_url, device)
     return imported_everything
-
-def load_data_async(device, start_at=datetime.min, reload_data=False):
-    # If the lock didn't get released but the task is finished, ignore it
-    if device.download_task == "" or result(device.download_task) is not None:
-        device.download_task = async_task(load_data, hook=device.finish_download, \
-            device=device, start_at=start_at, reload_data=reload_data)
