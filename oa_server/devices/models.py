@@ -7,12 +7,14 @@ import csv
 import pytz
 import requests
 from django.db import models
+from django_q.tasks import async_task, result
 
 class Device(models.Model):
     name = models.CharField(max_length=64)
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
     notes = models.TextField()
+    download_task = models.CharField(max_length=64, default="")
     last_refreshed = models.DateTimeField(auto_now=False, default=datetime.min)
 
     @property
@@ -20,17 +22,14 @@ class Device(models.Model):
         return ping(self.ip)
 
     def refresh_data(self):
-        if load_data(self, self.last_refreshed):
-            self.last_refreshed = datetime.utcnow()
-            return True
-        return False
+        load_data_async(self, self.last_refreshed)
 
-    # Automatically refresh data after saving
-    # pylint: disable=W0222
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # TODO: Make this async using Celery
-        self.refresh_data()
+    def finish_download(self, task):
+        self.download_task = ""
+
+        # If all went well, update the last refreshed time
+        if task.result:
+            self.last_refreshed = datetime.utcnow()
 
 class Datum(models.Model):
     class Meta:
@@ -114,14 +113,18 @@ def json_to_object(address):
 
 # pylint: disable=R0912,R0914
 # TODO: Refactor this to use recursion
-def load_data(device, start_at=datetime.min):
+def load_data(device, start_at=datetime.min, reload_data=False):
     """
-    Checks every file on the device for new data starting at the specified date
+    Checks every file on the device for new data starting at the specified date.
+    If reload is True, deletes existing data before reloading
 
     Returns True if new data found and no errors are encountered; false otherwise
     """
     if not device.online:
         return False
+
+    if reload_data:
+        Datum.objects.filter(device=device).delete()
 
     # Get the base URL for listing years
     base_url = f"http://{device.ip}/data"
@@ -195,8 +198,8 @@ def load_data(device, start_at=datetime.min):
                     imported_everything = imported_everything and load_csv(hour_url, device)
     return imported_everything
 
-def reload_data(device):
-    """Deletes and reloads data from the specified device"""
-    Datum.objects.filter(device=device).delete()
-
-    load_data(device)
+def load_data_async(device, start_at=datetime.min, reload_data=False):
+    # If the lock didn't get released but the task is finished, ignore it
+    if device.download_task == "" or result(device.download_task) is not None:
+        device.download_task = async_task(load_data, hook=device.finish_download, \
+            device=device, start_at=start_at, reload_data=reload_data)

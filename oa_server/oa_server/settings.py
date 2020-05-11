@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'devices',
     'time_series',
+    'django_q',
 ]
 
 MIDDLEWARE = [

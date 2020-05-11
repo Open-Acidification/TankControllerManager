@@ -48,7 +48,8 @@ def device_list(request):
 
         device_serializer = DeviceSerializer(data=data)
         if device_serializer.is_valid():
-            device_serializer.save()
+            device = device_serializer.save()
+            device.refresh_data()
             return JsonResponse(device_serializer.data, status=201)
         return JsonResponse(device_serializer.errors, status=400)
 
