@@ -16,11 +16,14 @@
     "vuetify": "^2.2.25"
   },
   "devDependencies": {
-    "@vue/cli-service": "~4.3.0",
+    "@mdi/font": "^5.1.45",
+    "@mdi/js": "^5.1.45",
     "@vue/cli-plugin-babel": "~4.3.0",
     "@vue/cli-plugin-eslint": "~4.3.0",
     "@vue/cli-plugin-router": "~4.3.0",
+    "@vue/cli-service": "~4.3.0",
     "babel-eslint": "^10.1.0",
+    "css-loader": "^3.5.3",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
     "sass": "^1.19.0",

@@ -9,7 +9,7 @@ module.exports = {
         "poll": 1500
       },
       "public": "0.0.0.0"
-    }
+    },
   },
   "pages": {
     "index": {
