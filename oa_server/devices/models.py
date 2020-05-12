@@ -32,7 +32,8 @@ class Device(models.Model):
         """
         # Make sure that the device has a schedule associated with it
         # If the lock didn't get released but the task is finished, ignore it
-        if self.schedule is not None and (self.download_task == "" or result(self.download_task) is not None):
+        if self.schedule is not None and \
+            (self.download_task == "" or result(self.download_task) is not None):
             self.download_task = self.schedule.task
             load_result = self.load_data(start_at=self.last_refreshed)
             self.finish_download(fetch(self.download_task))
