@@ -10,6 +10,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
+from django_q.tasks import schedule, result
 
 
 @csrf_exempt
@@ -49,7 +50,9 @@ def device_list(request):
         device_serializer = DeviceSerializer(data=data)
         if device_serializer.is_valid():
             device = device_serializer.save()
-            device.refresh_data()
+            # Schedule a refresh every 15 minutes
+            schedule('devices.views.scheduled_refresh', mac=mac, schedule_type='I', \
+                minutes=15)
             return JsonResponse(device_serializer.data, status=201)
         return JsonResponse(device_serializer.errors, status=400)
 
@@ -139,3 +142,10 @@ def manage_data(request, mac):
         writer.writerow(datum)
 
     return response
+
+def scheduled_refresh(mac):
+    """
+    Wrapper for Device.scheduled_refresh(), allowing passing function as string
+    """
+    device = Device.objects.get(mac=mac)
+    return device.scheduled_refresh()

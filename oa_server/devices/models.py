@@ -7,30 +7,142 @@ import csv
 import pytz
 import requests
 from django.db import models
-from django_q.tasks import async_task, result
+from django_q.tasks import async_task, result, fetch
+from django_q.models import Schedule
 
 class Device(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
     notes = models.TextField()
     download_task = models.CharField(max_length=32, default="")
+    schedule = models.ForeignKey(Schedule, blank=True, null=True, \
+        on_delete=models.CASCADE)
     last_refreshed = models.DateTimeField(auto_now=False, default=datetime.min)
 
     @property
     def online(self):
         return ping(self.ip)
 
+    def scheduled_refresh(self):
+        """
+        The method to be called for a scheduled refresh.
+
+        Schedule creates its own asynchronous task, so load_data() is called synchronously here.
+        """
+        # First make sure that the device has a schedule associated with it
+        if self.schedule is None:
+            return False
+        # If the lock didn't get released but the task is finished, ignore it
+        if self.download_task == "" or result(self.download_task) is not None:
+            self.download_task = self.schedule.task
+            result = self.load_data(start_at=self.last_refreshed)
+            self.finish_download(fetch(self.download_task))
+
     def refresh_data(self, start_at=None, reload_data=False):
+        """
+        Asynchronous wrapper method for load_data()
+        """
         if start_at is None:
             # We can't use self for default argument
             start_at = self.last_refreshed
         # If the lock didn't get released but the task is finished, ignore it
         if self.download_task == "" or result(self.download_task) is not None:
-            self.download_task = async_task(load_data, hook=self.finish_download, \
-                device=self, start_at=start_at, reload_data=reload_data)
+            self.download_task = async_task(self.load_data, hook=self.finish_download, \
+                start_at=start_at, reload_data=reload_data)
+
+    # pylint: disable=R0912,R0914
+    # TODO: Refactor this to use recursion
+    def load_data(self, start_at=datetime.min, reload_data=False):
+        """
+        Checks every file on the device for new data starting at the specified date.
+        If reload is True, deletes existing data before reloading
+
+        Returns True if new data found and no errors are encountered; false otherwise
+        """
+        # For the sake of clarity
+        device = self
+
+        if not device.online:
+            return False
+
+        if reload_data:
+            Datum.objects.filter(device=device).delete()
+
+        # Get the base URL for listing years
+        base_url = f"http://{device.ip}/data"
+
+        # Get list of years
+        years = json_to_object(base_url)
+
+        # We can't pull up the list of years, so fail
+        if years is None:
+            return False
+
+        imported_everything = True
+
+        for year in years:
+            # Skip years that fall before our specified start time
+            if int(year) < start_at.year:
+                continue
+
+            # Get the URL for listing months in the year
+            year_url = f"{base_url}/{year}"
+
+            # Get list of months
+            months = json_to_object(year_url)
+
+            # If this year is inaccessible, try the next
+            if months is None:
+                imported_everything = False
+                continue
+
+            for month in months:
+                # Skip months that fall before our specified start time
+                if int(year) == start_at.year & int(month) < start_at.month:
+                    continue
+
+                # Get the URL for listing days in the month
+                month_url = f"{year_url}/{month}"
+
+                # Get list of days
+                days = json_to_object(month_url)
+
+                # If this month is inaccessible, try the next
+                if days is None:
+                    imported_everything = False
+                    continue
+
+                for day in days:
+                    # Skip days that fall before our specified start time
+                    if int(month) == start_at.month & int(day) < start_at.day:
+                        continue
+
+                    # Get the URL for listing hours in the day
+                    day_url = f"{month_url}/{day}"
+
+                    # Get list of hours
+                    hours = json_to_object(day_url)
+
+                    # If this day is inaccessible, try the next
+                    if hours is None:
+                        imported_everything = False
+                        continue
+
+                    for hour in hours:
+                        # Skip hours that fall before our specified start time
+                        if int(day) == start_at.day & int(hour) < start_at.hour:
+                            continue
+
+                        # Get the URL for the hour's CSV
+                        hour_url = f"{day_url}/{hour}"
+
+                        # Load the CSV
+                        imported_everything = imported_everything and load_csv(hour_url, device)
+        return imported_everything
 
     def finish_download(self, task):
+        # Release the lock
         self.download_task = ""
 
         # If all went well, update the last refreshed time
@@ -116,90 +228,3 @@ def json_to_object(address):
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, \
         json.JSONDecodeError, ValueError):
         return None
-
-# pylint: disable=R0912,R0914
-# TODO: Refactor this to use recursion
-def load_data(device, start_at=datetime.min, reload_data=False):
-    """
-    Checks every file on the device for new data starting at the specified date.
-    If reload is True, deletes existing data before reloading
-
-    Returns True if new data found and no errors are encountered; false otherwise
-    """
-    if not device.online:
-        return False
-
-    if reload_data:
-        Datum.objects.filter(device=device).delete()
-
-    # Get the base URL for listing years
-    base_url = f"http://{device.ip}/data"
-
-    # Get list of years
-    years = json_to_object(base_url)
-
-    # We can't pull up the list of years, so fail
-    if years is None:
-        return False
-
-    imported_everything = True
-
-    for year in years:
-        # Skip years that fall before our specified start time
-        if int(year) < start_at.year:
-            continue
-
-        # Get the URL for listing months in the year
-        year_url = f"{base_url}/{year}"
-
-        # Get list of months
-        months = json_to_object(year_url)
-
-        # If this year is inaccessible, try the next
-        if months is None:
-            imported_everything = False
-            continue
-
-        for month in months:
-            # Skip months that fall before our specified start time
-            if int(year) == start_at.year & int(month) < start_at.month:
-                continue
-
-            # Get the URL for listing days in the month
-            month_url = f"{year_url}/{month}"
-
-            # Get list of days
-            days = json_to_object(month_url)
-
-            # If this month is inaccessible, try the next
-            if days is None:
-                imported_everything = False
-                continue
-
-            for day in days:
-                # Skip days that fall before our specified start time
-                if int(month) == start_at.month & int(day) < start_at.day:
-                    continue
-
-                # Get the URL for listing hours in the day
-                day_url = f"{month_url}/{day}"
-
-                # Get list of hours
-                hours = json_to_object(day_url)
-
-                # If this day is inaccessible, try the next
-                if hours is None:
-                    imported_everything = False
-                    continue
-
-                for hour in hours:
-                    # Skip hours that fall before our specified start time
-                    if int(day) == start_at.day & int(hour) < start_at.hour:
-                        continue
-
-                    # Get the URL for the hour's CSV
-                    hour_url = f"{day_url}/{hour}"
-
-                    # Load the CSV
-                    imported_everything = imported_everything and load_csv(hour_url, device)
-    return imported_everything
