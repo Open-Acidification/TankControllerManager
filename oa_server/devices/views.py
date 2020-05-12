@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
 from django_q.tasks import schedule, result
+from django_q.models import Schedule
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
 
@@ -53,6 +54,7 @@ def device_list(request):
             # Schedule a refresh every 15 minutes
             device.schedule = schedule('devices.views.scheduled_refresh', mac=mac, \
                 schedule_type='I', minutes=15)
+            device.save()
             return JsonResponse(device_serializer.data, status=201)
         return JsonResponse(device_serializer.errors, status=400)
 
@@ -128,17 +130,17 @@ def manage_data(request, mac):
 
     # Set up CSV writer
     fieldnames = ['time', 'tankid', 'temp', 'temp_setpoint', 'pH', \
-        'pH_setpoint', 'on_time', 'Kp', 'Ki', 'Kd']
+        'pH_setpoint', 'on_time']
     writer = csv.DictWriter(response, fieldnames, extrasaction='ignore')
 
     # CSV Writing
     # Write custom header
     writer.writerow({'time':'time', 'tankid':'tankid', 'temp':'temp', \
         'temp_setpoint':'temp setpoint', 'pH':'pH', 'pH_setpoint':'pH setpoint', \
-        'on_time':'onTime', 'Kp':'Kp', 'Ki':'Ki', 'Kd':'Kd'})
+        'on_time':'onTime'})
     # Write data
     for datum in data:
-        datum['time'] = datum['time'].strftime('%Y/%m/%d %H:%M:%S:%f')
+        datum['time'] = datum['time'].strftime('%Y/%m/%d %H:%M:%S')
         writer.writerow(datum)
 
     return response

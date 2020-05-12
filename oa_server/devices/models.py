@@ -6,9 +6,9 @@ import json
 import csv
 import pytz
 import requests
-from django.db import models
+from django.db import models, utils
 from django_q.tasks import async_task, result, fetch
-from django_q.models import Schedule
+from django_q.models import Task, Schedule
 
 class Device(models.Model):
     name = models.CharField(max_length=32)
@@ -30,15 +30,18 @@ class Device(models.Model):
 
         Schedule creates its own asynchronous task, so load_data() is called synchronously here.
         """
-        # Make sure that the device has a schedule associated with it
+        # First make sure that the device has a schedule associated with it
+        if self.schedule is None:
+            return "This device has no associated schedule."
         # If the lock didn't get released but the task is finished, ignore it
-        if self.schedule is not None and \
-            (self.download_task == "" or result(self.download_task) is not None):
-            self.download_task = self.schedule.task
+        if self.download_task == "" or result(self.download_task) is not None:
+            self.download_task = Task.objects.latest('started').id
+            self.save()
+
             load_result = self.load_data(start_at=self.last_refreshed)
             self.finish_download(fetch(self.download_task))
             return load_result
-        return False
+        return "The device is already downloading."
 
     def refresh_data(self, start_at=None, reload_data=False):
         """
@@ -51,6 +54,7 @@ class Device(models.Model):
         if self.download_task == "" or result(self.download_task) is not None:
             self.download_task = async_task(self.load_data, hook=self.finish_download, \
                 start_at=start_at, reload_data=reload_data)
+            self.save()
 
     # pylint: disable=R0912,R0914
     # TODO: Refactor this to use recursion
@@ -59,13 +63,13 @@ class Device(models.Model):
         Checks every file on the device for new data starting at the specified date.
         If reload is True, deletes existing data before reloading
 
-        Returns True if new data found and no errors are encountered; false otherwise
+        Returns a list of inaccessible endpoints
         """
         # For the sake of clarity
         device = self
 
         if not device.online:
-            return False
+            return "The device is offline."
 
         if reload_data:
             Datum.objects.filter(device=device).delete()
@@ -78,9 +82,9 @@ class Device(models.Model):
 
         # We can't pull up the list of years, so fail
         if years is None:
-            return False
+            return "This device has no data."
 
-        imported_everything = True
+        missed_data = []
 
         for year in years:
             # Skip years that fall before our specified start time
@@ -95,7 +99,7 @@ class Device(models.Model):
 
             # If this year is inaccessible, try the next
             if months is None:
-                imported_everything = False
+                missed_data.append(year)
                 continue
 
             for month in months:
@@ -111,7 +115,7 @@ class Device(models.Model):
 
                 # If this month is inaccessible, try the next
                 if days is None:
-                    imported_everything = False
+                    missed_data.append(f"{year}/{month}")
                     continue
 
                 for day in days:
@@ -127,7 +131,7 @@ class Device(models.Model):
 
                     # If this day is inaccessible, try the next
                     if hours is None:
-                        imported_everything = False
+                        missed_data.append(f"{year}/{month}/{day}")
                         continue
 
                     for hour in hours:
@@ -139,16 +143,19 @@ class Device(models.Model):
                         hour_url = f"{day_url}/{hour}"
 
                         # Load the CSV
-                        imported_everything = imported_everything and load_csv(hour_url, device)
-        return imported_everything
+                        if not load_csv(hour_url, device):
+                            missed_data.append(f"{year}/{month}/{day}/{hour}")
+        return missed_data
 
     def finish_download(self, task):
         # Release the lock
         self.download_task = ""
 
-        # If all went well, update the last refreshed time
-        if task.result:
+        # If all went well (i.e. the error list is empty), update the last refreshed time
+        if not task.result:
             self.last_refreshed = datetime.utcnow()
+
+        self.save()
 
 class Datum(models.Model):
     class Meta:
@@ -164,9 +171,6 @@ class Datum(models.Model):
     pH = models.FloatField()
     pH_setpoint = models.FloatField()
     on_time = models.IntegerField()
-    Kp = models.FloatField()
-    Ki = models.FloatField()
-    Kd = models.FloatField()
 
 def ping(host):
     if host is None:
@@ -196,20 +200,21 @@ def load_csv(address, device):
         next(reader, None)
         # Import rows
         for row in reader:
-            if len(row) == 10:
-                Datum.objects.get_or_create(
-                    device=device,
-                    time=pytz.utc.localize(datetime.strptime(row[0], '%Y/%m/%d %H:%M:%S:%f')),
-                    tankid=int(row[1]),
-                    temp=float(row[2]),
-                    temp_setpoint=float(row[3]),
-                    pH=float(row[4]),
-                    pH_setpoint=float(row[5]),
-                    on_time=float(row[6]),
-                    Kp=float(row[7]),
-                    Ki=float(row[8]),
-                    Kd=float(row[9])
-                )
+            if len(row) == 7:
+                try:
+                    Datum.objects.create(
+                        device=device,
+                        time=pytz.utc.localize(datetime.strptime(row[0], '%Y/%m/%d %H:%M:%S')),
+                        tankid=int(row[1]),
+                        temp=float(row[2]),
+                        temp_setpoint=float(row[3]),
+                        pH=float(row[4]),
+                        pH_setpoint=float(row[5]),
+                        on_time=float(row[6])
+                    )
+                except utils.IntegrityError:
+                    pass
+
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
         imported_everything = False
 
