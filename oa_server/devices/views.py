@@ -8,9 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
+from django_q.tasks import schedule, result
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
-from django_q.tasks import schedule, result
 
 
 @csrf_exempt
@@ -51,8 +51,8 @@ def device_list(request):
         if device_serializer.is_valid():
             device = device_serializer.save()
             # Schedule a refresh every 15 minutes
-            schedule('devices.views.scheduled_refresh', mac=mac, schedule_type='I', \
-                minutes=15)
+            device.schedule = schedule('devices.views.scheduled_refresh', mac=mac, \
+                schedule_type='I', minutes=15)
             return JsonResponse(device_serializer.data, status=201)
         return JsonResponse(device_serializer.errors, status=400)
 

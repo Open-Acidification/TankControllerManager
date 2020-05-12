@@ -30,14 +30,14 @@ class Device(models.Model):
 
         Schedule creates its own asynchronous task, so load_data() is called synchronously here.
         """
-        # First make sure that the device has a schedule associated with it
-        if self.schedule is None:
-            return False
+        # Make sure that the device has a schedule associated with it
         # If the lock didn't get released but the task is finished, ignore it
-        if self.download_task == "" or result(self.download_task) is not None:
+        if self.schedule is not None and (self.download_task == "" or result(self.download_task) is not None):
             self.download_task = self.schedule.task
-            result = self.load_data(start_at=self.last_refreshed)
+            load_result = self.load_data(start_at=self.last_refreshed)
             self.finish_download(fetch(self.download_task))
+            return load_result
+        return False
 
     def refresh_data(self, start_at=None, reload_data=False):
         """
