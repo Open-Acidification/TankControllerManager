@@ -17,8 +17,8 @@ class Device(models.Model):
     notes = models.TextField()
     download_task = models.CharField(max_length=32, default="")
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
-        on_delete=models.CASCADE)
-    last_refreshed = models.DateTimeField(auto_now=False, default=datetime.min)
+        on_delete=models.CASCADE),
+    next_path = models.CharField(max_length=16, default=""),
 
     @property
     def online(self):
@@ -32,128 +32,81 @@ class Device(models.Model):
         """
         # First make sure that the device has a schedule associated with it
         if self.schedule is None:
-            return "This device has no associated schedule."
+            return ["This device has no associated schedule."]
         # If the lock didn't get released but the task is finished, ignore it
         if self.download_task == "" or result(self.download_task) is not None:
             self.download_task = Task.objects.latest('started').id
             self.save()
 
-            load_result = self.load_data(start_at=self.last_refreshed)
+            load_result = self.load_data()
             self.finish_download(fetch(self.download_task))
             return load_result
         return "The device is already downloading."
 
-    def refresh_data(self, start_at=None, reload_data=False):
+    def refresh_data(self, reload_data=False):
         """
         Asynchronous wrapper method for load_data()
         """
-        if start_at is None:
-            # We can't use self for default argument
-            start_at = self.last_refreshed
         # If the lock didn't get released but the task is finished, ignore it
         if self.download_task == "" or result(self.download_task) is not None:
             self.download_task = async_task(self.load_data, hook=self.finish_download, \
-                start_at=start_at, reload_data=reload_data)
+                reload_data=reload_data)
             self.save()
 
-    # pylint: disable=R0912,R0914
-    # TODO: Refactor this to use recursion
-    def load_data(self, start_at=datetime.min, reload_data=False):
+    def load_data(self, start_path=None, reload_data=False):
         """
         Checks every file on the device for new data starting at the specified date.
         If reload is True, deletes existing data before reloading
 
-        Returns a list of inaccessible endpoints
+        Returns a list of inaccessible endpoints, or a list containing the single last endpoint
         """
-        # For the sake of clarity
-        device = self
+        # We can't use self for default argument
+        # if start_path is None:
+        #     start_path = self.next_path
+        start_path = ""
+        if not self.online:
+            # We return the start_path as the first element
+            # so that it remains as such during cleanup.
+            return [start_path, "Error: The device is offline."]
 
-        if not device.online:
-            return "The device is offline."
-
+        # Delete all existing data if a full reload is requested
         if reload_data:
-            Datum.objects.filter(device=device).delete()
+            Datum.objects.filter(device=self).delete()
 
-        # Get the base URL for listing years
-        base_url = f"http://{device.ip}/data"
+        # Get the base URL from the device's IP
+        base_url = f"http://{self.ip}/data"
 
-        # Get list of years
-        years = json_to_object(base_url)
+        # Ensure that our starting point has four values, even if the provided path is incomplete
+        start_at = [0, 0, 0, 0]
 
-        # We can't pull up the list of years, so fail
-        if years is None:
-            return "This device has no data."
+        # Update starting point to match path
+        endpoints = start_path.split('/')
+        for idx in range(min(len(endpoints), 4)):
+            # Only accept valid integers for endpoints
+            try:
+                endpoint = int(endpoints[idx])
+            except (ValueError, TypeError):
+                endpoint = 0
+            start_at[idx] += endpoint
 
-        missed_data = []
+        # We will fill this array with any paths for which we fail to download data
+        missed_paths = []
 
-        for year in years:
-            # Skip years that fall before our specified start time
-            if int(year) < start_at.year:
-                continue
+        # Begin recursion
+        last_path = load_data_recursive(self, start_at, base_url, missed_paths)
 
-            # Get the URL for listing months in the year
-            year_url = f"{base_url}/{year}"
-
-            # Get list of months
-            months = json_to_object(year_url)
-
-            # If this year is inaccessible, try the next
-            if months is None:
-                missed_data.append(year)
-                continue
-
-            for month in months:
-                # Skip months that fall before our specified start time
-                if int(year) == start_at.year & int(month) < start_at.month:
-                    continue
-
-                # Get the URL for listing days in the month
-                month_url = f"{year_url}/{month}"
-
-                # Get list of days
-                days = json_to_object(month_url)
-
-                # If this month is inaccessible, try the next
-                if days is None:
-                    missed_data.append(f"{year}/{month}")
-                    continue
-
-                for day in days:
-                    # Skip days that fall before our specified start time
-                    if int(month) == start_at.month & int(day) < start_at.day:
-                        continue
-
-                    # Get the URL for listing hours in the day
-                    day_url = f"{month_url}/{day}"
-
-                    # Get list of hours
-                    hours = json_to_object(day_url)
-
-                    # If this day is inaccessible, try the next
-                    if hours is None:
-                        missed_data.append(f"{year}/{month}/{day}")
-                        continue
-
-                    for hour in hours:
-                        # Skip hours that fall before our specified start time
-                        if int(day) == start_at.day & int(hour) < start_at.hour:
-                            continue
-
-                        # Get the URL for the hour's CSV
-                        hour_url = f"{day_url}/{hour}"
-
-                        # Load the CSV
-                        if not load_csv(hour_url, device):
-                            missed_data.append(f"{year}/{month}/{day}/{hour}")
-        return missed_data
+        # If we didn't miss any paths, the last path becomes the next one with which to start
+        if not missed_paths:
+            missed_paths.append(last_path)
+        
+        return missed_paths
 
     def finish_download(self, task):
         # Release the lock
         self.download_task = ""
 
-        # If all went well (i.e. the error list is empty), update the last refreshed time
-        if not task.result:
-            self.last_refreshed = datetime.utcnow()
+        # Update the next path
+        self.next_path = task.result[0]
 
         self.save()
 
@@ -186,11 +139,16 @@ def ping(host):
 def load_csv(address, device):
     """
     Loads the CSV at the specified address and associates it with the specified device
+
+    Returns: 0 for error, 1 for success, and 2 for end of file
     """
-    imported_everything = True
 
     try:
         request = requests.get(address, stream=True, timeout=5)
+
+        # If HTTP status code is 416, we've reached the end of the file
+        if request.status_code == 416:
+            return 2
 
         # Set up reader
         lines = (line.decode('utf-8') for line in request.iter_lines())
@@ -198,8 +156,10 @@ def load_csv(address, device):
 
         # Skip header
         next(reader, None)
+
         # Import rows
         for row in reader:
+            # Ignore lines of improper length
             if len(row) == 7:
                 try:
                     Datum.objects.create(
@@ -210,15 +170,32 @@ def load_csv(address, device):
                         temp_setpoint=float(row[3]),
                         pH=float(row[4]),
                         pH_setpoint=float(row[5]),
-                        on_time=float(row[6])
+                        on_time=int(row[6])
                     )
-                except utils.IntegrityError:
+                # Ignore lines if they aren't formatted correctly or already exist
+                except (utils.IntegrityError, ValueError):
                     pass
 
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-        imported_everything = False
+        return 0
 
-    return imported_everything
+    return 1
+
+def page_csv(address, device):
+    """
+    Repeatedly call load_csv() in 100-line pages until the end is reached
+
+    Return True if successful; False if error encountered
+    """
+    line = 0
+
+    status = 1
+
+    while status == 1:
+        status = load_csv(f"{address}?start={line}&num=100", device)
+        line += 100
+
+    return bool(status)
 
 def json_to_object(address):
     """
@@ -234,3 +211,35 @@ def json_to_object(address):
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, \
         json.JSONDecodeError, ValueError):
         return None
+
+def load_data_recursive(device, start_at, base_url, missed_paths, path='', level=0):
+    """
+    Recursive helper function for load_data()
+    """
+    if level < 4:
+        # We need to go deeper
+        dirs = json_to_object(base_url + path)
+
+        # If this endpoint returns no directories, add it as a missed path
+        if dirs is None:
+            missed_paths.append(path)
+            return path
+
+        # Define the last path visited by this branch
+        last_path = ''
+        for dir in dirs:
+            # Skip directories that come before our starting point
+            if int(dir) < start_at[level]:
+                continue
+            # Call the function for this subdirectory
+            last_path = load_data_recursive(device, start_at, base_url, \
+                missed_paths, path+'/'+dir, level+1)
+        return last_path
+
+    # We've reached a CSV
+    load_success = page_csv(base_url + path, device)
+
+    if not load_success:
+        missed_paths.append(path)
+
+    return path
