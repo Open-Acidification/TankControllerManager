@@ -17,8 +17,8 @@ class Device(models.Model):
     notes = models.TextField()
     download_task = models.CharField(max_length=32, default="")
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
-        on_delete=models.CASCADE),
-    next_path = models.CharField(max_length=16, default=""),
+        on_delete=models.CASCADE)
+    next_path = models.CharField(max_length=16, default="")
 
     @property
     def online(self):
@@ -98,7 +98,7 @@ class Device(models.Model):
         # If we didn't miss any paths, the last path becomes the next one with which to start
         if not missed_paths:
             missed_paths.append(last_path)
-        
+
         return missed_paths
 
     def finish_download(self, task):
@@ -212,28 +212,31 @@ def json_to_object(address):
         json.JSONDecodeError, ValueError):
         return None
 
+# Pylint requires fewer arguments in order to encourage refactoring,
+# but that's not really possible here.
+#pylint: disable=too-many-arguments
 def load_data_recursive(device, start_at, base_url, missed_paths, path='', level=0):
     """
     Recursive helper function for load_data()
     """
     if level < 4:
         # We need to go deeper
-        dirs = json_to_object(base_url + path)
+        directories = json_to_object(base_url + path)
 
         # If this endpoint returns no directories, add it as a missed path
-        if dirs is None:
+        if directories is None:
             missed_paths.append(path)
             return path
 
         # Define the last path visited by this branch
         last_path = ''
-        for dir in dirs:
+        for directory in directories:
             # Skip directories that come before our starting point
-            if int(dir) < start_at[level]:
+            if int(directory) < start_at[level]:
                 continue
             # Call the function for this subdirectory
             last_path = load_data_recursive(device, start_at, base_url, \
-                missed_paths, path+'/'+dir, level+1)
+                missed_paths, path+'/'+directory, level+1)
         return last_path
 
     # We've reached a CSV
