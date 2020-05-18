@@ -1,5 +1,4 @@
 import csv
-import re
 from datetime import datetime
 import requests
 from django.shortcuts import render
@@ -12,6 +11,7 @@ from django_q.tasks import schedule, result
 from django_q.models import Schedule
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
+from devices.utils import get_mac
 
 
 @csrf_exempt
@@ -24,16 +24,7 @@ def device_list(request):
 
         # Get the MAC address, or return an error if the IP can't be reached
         try:
-            mac = requests.get(f"http://{address}/mac", timeout=2)
-            # Fail if API call yields wrong status code
-            if mac.status_code != 200:
-                raise ValueError(f"Received response code {mac.status_code}; expected 200")
-
-            # Get everything before line break
-            mac = mac.text.partition('\n')[0].strip().lower()
-            # Fail if returned MAC is of invalid format
-            if not re.match("[0-9a-f]{2}(:)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", mac):
-                raise ValueError(f"The returned MAC address \"{mac}\" is invalid")
+            mac = get_mac(address)
 
         except requests.exceptions.ConnectionError:
             return HttpResponse(f"The specified IP address {address} is invalid", status=421)

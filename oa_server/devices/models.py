@@ -1,5 +1,3 @@
-import platform
-import subprocess
 from datetime import datetime
 from contextlib import closing
 import json
@@ -9,6 +7,7 @@ import requests
 from django.db import models, utils
 from django_q.tasks import async_task, result, fetch
 from django_q.models import Task, Schedule
+from devices.utils import get_mac
 
 class Device(models.Model):
     name = models.CharField(max_length=32)
@@ -21,8 +20,8 @@ class Device(models.Model):
     next_path = models.CharField(max_length=16, default="")
 
     @property
-    def online(self):
-        return ping(self.ip)
+    def status(self):
+        return verify_mac(self.mac, self.ip)
 
     def scheduled_refresh(self):
         """
@@ -64,10 +63,13 @@ class Device(models.Model):
         # if start_path is None:
         #     start_path = self.next_path
         start_path = ""
-        if not self.online:
+
+        if self.status == 0:
             # We return the start_path as the first element
             # so that it remains as such during cleanup.
             return [start_path, "Error: The device is offline."]
+        if self.status == 2:
+            return [start_path, "Error: The device address has changed. Update IP address."]
 
         # Delete all existing data if a full reload is requested
         if reload_data:
@@ -125,16 +127,24 @@ class Datum(models.Model):
     pH_setpoint = models.FloatField()
     on_time = models.IntegerField()
 
-def ping(host):
-    if host is None:
-        return False
+def verify_mac(mac, address):
+    """
+    Verifies that the supplied MAC address matches that of the supplied IP address
 
-    # Chooses appropriate parameter depending on the platform
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
+    Return values:
+    0 = Device is offline
+    1 = MAC address in DB matches MAC address returned by device
+    2 = MAC address in DB does not match MAC address returned by device
+    """
+    try:
+        status = mac == get_mac(address)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError):
+        return 0
 
-    command = ['ping', param, '1', host]
+    if status:
+        return 1
 
-    return subprocess.call(command) == 0
+    return 2
 
 def load_csv(address, device):
     """
