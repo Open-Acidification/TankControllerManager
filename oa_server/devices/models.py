@@ -183,7 +183,7 @@ def load_csv(address, device):
                         on_time=int(row[6])
                     )
                 # Ignore lines if they aren't formatted correctly or already exist
-                except (utils.IntegrityError, ValueError):
+                except (utils.IntegrityError, ValueError, UnicodeDecodeError):
                     pass
 
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
