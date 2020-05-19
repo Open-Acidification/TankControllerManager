@@ -18,6 +18,14 @@ export default {
   data: () => ({
     //
   }),
+
+  created() {
+    this.$store.dispatch('updateDevices');
+
+    setInterval(function () {
+      this.$store.dispatch('updateDevices');
+    }.bind(this), 30000); 
+  }
 };
 </script>
 

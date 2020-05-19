@@ -10,7 +10,7 @@
       dense
     >
       <v-card
-        v-for="device in devices"
+        v-for="device in this.$store.state.devices"
         :key="device.mac"
       >
         <v-list-item two-line>
