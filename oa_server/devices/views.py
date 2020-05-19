@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 import requests
+import pytz
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -94,16 +95,16 @@ def manage_data(request, mac):
     ### Read the specified device's data (GET) ###
 
     # Query database #
-    min_time = request.GET.get('start', default=datetime.min)
-    max_time = request.GET.get('end', default=datetime.utcnow())
+    min_time = request.GET.get('start', default=pytz.utc.localize(datetime.min))
+    max_time = request.GET.get('end', default=pytz.utc.localize(datetime.utcnow()))
 
     # Convert parameters to datetime if not already
     try:
-        min_time = datetime.strptime(min_time, '%y%m%d_%H%M%S')
+        min_time = pytz.utc.localize(datetime.strptime(min_time, '%y%m%d_%H%M%S'))
     except TypeError:
         pass
     try:
-        max_time = datetime.strptime(max_time, '%y%m%d_%H%M%S')
+        max_time = pytz.utc.localize(datetime.strptime(max_time, '%y%m%d_%H%M%S'))
     except TypeError:
         pass
 

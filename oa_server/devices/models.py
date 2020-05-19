@@ -60,9 +60,8 @@ class Device(models.Model):
         Returns a list of inaccessible endpoints, or a list containing the single last endpoint
         """
         # We can't use self for default argument
-        # if start_path is None:
-        #     start_path = self.next_path
-        start_path = ""
+        if start_path is None:
+            start_path = self.next_path
 
         if self.status == 0:
             # We return the start_path as the first element
@@ -183,10 +182,11 @@ def load_csv(address, device):
                         on_time=int(row[6])
                     )
                 # Ignore lines if they aren't formatted correctly or already exist
-                except (utils.IntegrityError, ValueError, UnicodeDecodeError):
+                except (utils.IntegrityError, ValueError):
                     pass
 
-    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, \
+        requests.exceptions.ChunkedEncodingError, UnicodeDecodeError):
         return 0
 
     return 1
