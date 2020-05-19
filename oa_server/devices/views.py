@@ -62,11 +62,12 @@ def device_detail(request, mac):
     try:
         device = Device.objects.get(mac=mac)
     except Device.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse("There is no device with the specified MAC address.", status=404)
 
     # Update the specified time series
     if request.method == 'PUT':
         data = JSONParser().parse(request)
+        data['mac'] = mac
         device_serializer = DeviceSerializer(device, data=data)
         if device_serializer.is_valid():
             device_serializer.save()
