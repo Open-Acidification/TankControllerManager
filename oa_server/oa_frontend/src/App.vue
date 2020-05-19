@@ -1,23 +1,18 @@
 <template>
   <v-app>
     <Header/>
-
-    <v-content>
-      <Devices/>
-    </v-content>
+    <router-view/>
   </v-app>
 </template>
 
 <script>
 import Header from './components/Header.vue';
-import Devices from './components/devices/Devices'
 
 export default {
   name: 'App',
 
   components: {
     Header,
-    Devices,
   },
 
   data: () => ({
@@ -25,3 +20,9 @@ export default {
   }),
 };
 </script>
+
+<style>
+  html {
+    overflow-y: hidden;
+  }
+</style>

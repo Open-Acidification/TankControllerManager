@@ -1,6 +1,9 @@
 <template>
   <v-content>
-    <DeviceList v-bind:devices="devices"/>
+    <v-container fluid  class="pa-0 ma-0 fill-height">
+      <DeviceList :devices="devices"/>
+      <router-view/>
+    </v-container>
   </v-content>
 </template>
 
