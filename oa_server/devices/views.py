@@ -166,9 +166,8 @@ def query_data(constraints, **kwargs):
 def create_csv(data, download=False, identifier="", show_device=False):
     """
     Creates and returns a CSV from the given data.
-    
+
     If download=True, the browser downloads the CSV file instead of rendering it.
-    
     """
     response = HttpResponse(content_type='text/plain')
 

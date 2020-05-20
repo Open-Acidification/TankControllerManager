@@ -13,7 +13,7 @@ def get_tank_data(request, tankid):
     """
     # First, check if a device with the specified tank ID exists
     try:
-        device = Device.objects.get(tankid=tankid)
+        Device.objects.get(tankid=tankid)
     except Device.DoesNotExist:
         return HttpResponse("There is no device associated with the specified tank.", status=404)
 
