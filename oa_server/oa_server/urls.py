@@ -19,6 +19,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('api/devices/', include('devices.urls')),
+    path('api/tanks/', include('tanks.urls')),
     path('api/time_series/', include('time_series.urls')),
     path('admin/', admin.site.urls),
 ]

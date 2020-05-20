@@ -7,13 +7,15 @@ import requests
 from django.db import models, utils
 from django_q.tasks import async_task, result, fetch
 from django_q.models import Task, Schedule
-from devices.utils import get_mac
+from devices.utils import get_tankid, get_mac
 
 class Device(models.Model):
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
+    tankid = models.IntegerField(default=-1)
     notes = models.TextField()
+
     download_task = models.CharField(max_length=32, default="")
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
         on_delete=models.CASCADE)
@@ -21,7 +23,15 @@ class Device(models.Model):
 
     @property
     def status(self):
+        self.update_tankid()
         return verify_mac(self.mac, self.ip)
+
+    def update_tankid(self):
+        try:
+            self.tankid = get_tankid(self.ip)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError):
+            pass
+        self.save()
 
     def scheduled_refresh(self):
         """
@@ -110,21 +120,6 @@ class Device(models.Model):
         self.next_path = task.result[0]
 
         self.save()
-
-class Datum(models.Model):
-    class Meta:
-        unique_together = (('device', 'time'))
-        verbose_name_plural = "Data"
-
-    device = models.ForeignKey(Device, db_index=True, \
-        on_delete=models.CASCADE) # Deleting a device deletes all its data
-    time = models.DateTimeField(auto_now=False, db_index=True)
-    tankid = models.IntegerField()
-    temp = models.FloatField()
-    temp_setpoint = models.FloatField()
-    pH = models.FloatField()
-    pH_setpoint = models.FloatField()
-    on_time = models.IntegerField()
 
 def verify_mac(mac, address):
     """
@@ -222,8 +217,8 @@ def json_to_object(address):
         json.JSONDecodeError, ValueError):
         return None
 
-# Pylint requires fewer arguments in order to encourage refactoring,
-# but that's not really possible here.
+# Pylint requires five or fewer arguments in order to encourage refactoring,
+# but that's not really relevant here.
 #pylint: disable=too-many-arguments
 def load_data_recursive(device, start_at, base_url, missed_paths, path='', level=0):
     """
@@ -256,3 +251,18 @@ def load_data_recursive(device, start_at, base_url, missed_paths, path='', level
         missed_paths.append(path)
 
     return path
+
+class Datum(models.Model):
+    class Meta:
+        unique_together = (('device', 'time'))
+        verbose_name_plural = "Data"
+
+    device = models.ForeignKey(Device, db_index=True, \
+        on_delete=models.CASCADE) # Deleting a device deletes all its data
+    time = models.DateTimeField(auto_now=False, db_index=True)
+    tankid = models.IntegerField()
+    temp = models.FloatField()
+    temp_setpoint = models.FloatField()
+    pH = models.FloatField()
+    pH_setpoint = models.FloatField()
+    on_time = models.IntegerField()

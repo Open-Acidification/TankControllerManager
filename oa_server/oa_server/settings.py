@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'devices',
-    'time_series',
     'django_q',
+    'devices',
+    'tanks',
+    'time_series',
 ]
 
 MIDDLEWARE = [

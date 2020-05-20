@@ -3,8 +3,20 @@ import subprocess
 import re
 import requests
 
+def get_tankid(address):
+    tankid = requests.get(f"http://{address}/info", timeout=2)
+
+    # Fail if API call yields wrong status code
+    if tankid.status_code != 200:
+        raise ValueError(f"Received response code {tankid.status_code}; expected 200")
+
+    tankid = int(tankid.text.partition('\n')[0].strip())
+
+    return tankid
+
 def get_mac(address):
     mac = requests.get(f"http://{address}/mac", timeout=2)
+
     # Fail if API call yields wrong status code
     if mac.status_code != 200:
         raise ValueError(f"Received response code {mac.status_code}; expected 200")

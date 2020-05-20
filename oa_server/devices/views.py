@@ -132,7 +132,11 @@ def get_constraints(request):
     return {'start': start, 'end': end, 'freq': freq, 'cutoff': cutoff, 'total': total}
 
 def query_data(constraints, **kwargs):
+    """
+    Queries data from the specified device according to the specified constraints.
 
+    Returns the data as a list of dictionaries.
+    """
     # Run the query with the specified time constraints and any additional keyword arguments
     data = list(Datum.objects.filter(**kwargs, \
         time__range=[constraints['start'], constraints['end']]).order_by('time').values())
@@ -159,7 +163,13 @@ def query_data(constraints, **kwargs):
 
     return data
 
-def create_csv(data, download, identifier="", show_device=False):
+def create_csv(data, download=False, identifier="", show_device=False):
+    """
+    Creates and returns a CSV from the given data.
+    
+    If download=True, the browser downloads the CSV file instead of rendering it.
+    
+    """
     response = HttpResponse(content_type='text/plain')
 
     start = data[0]['time']
