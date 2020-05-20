@@ -17,6 +17,12 @@ def get_mac(address):
 
     return mac
 
+def strip_mac(mac):
+    """
+    Simplifies the MAC address by removing all special characters.
+    """
+    return re.sub('[^a-f0-9]+', '', mac)
+
 def ping(host):
     if host is None:
         return False

@@ -4,5 +4,5 @@ from . import views
 urlpatterns = [
     path('', views.device_list),
     path('<mac>/', views.device_detail),
-    path('<mac>/data', views.manage_data)
+    path('<mac>/data', views.get_device_data)
 ]
