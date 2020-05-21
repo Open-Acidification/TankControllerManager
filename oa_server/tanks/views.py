@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, JsonResponse
+from django.db import connection
 from tanks.serializers import TankHistorySerializer
 from devices.models import Device, Datum
 from devices.views import get_constraints, query_data, create_csv
-from django.db import connection
 
 @require_http_methods(["GET"])
 def get_tank_data(request, tankid):
