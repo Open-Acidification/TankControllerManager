@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse
-from devices.models import Device
+from django.http import HttpResponse, JsonResponse
+from tanks.serializers import TankHistorySerializer
+from devices.models import Device, Datum
 from devices.views import get_constraints, query_data, create_csv
+from django.db import connection
 
 @require_http_methods(["GET"])
 def get_tank_data(request, tankid):
@@ -25,3 +27,37 @@ def get_tank_data(request, tankid):
     show_device = bool(request.GET.get('showDevice', default=False))
 
     return create_csv(data, download, 'tankid-'+tankid, show_device)
+
+@require_http_methods(["GET"])
+def get_tank_history(request, tankid):
+    """
+    Returns a response listing the device history for each tank.
+    """
+    # Sanitize tankid
+    tankid = int(tankid)
+    # This query is too complex to be worth constructing in ORM, so just use raw SQL.
+    cursor = connection.cursor()
+    cursor.execute("""\
+        SELECT t.time, t.device_id AS mac
+        FROM (SELECT d.time, d.device_id, LAG(d.device_id) OVER(ORDER BY d.time) AS prev_device_id
+            FROM (SELECT time, tankid, device_id
+                FROM devices_datum
+                WHERE tankid = %s
+            ) AS d
+        ) AS t WHERE t.device_id IS DISTINCT FROM t.prev_device_id;
+    """, [tankid])
+
+    history = dictfetchall(cursor)
+
+    history_serializer = TankHistorySerializer(history, many=True)
+    return JsonResponse(history_serializer.data, safe=False)
+
+def dictfetchall(cursor):
+    """
+    Return all rows from a cursor as a dict
+    """
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
