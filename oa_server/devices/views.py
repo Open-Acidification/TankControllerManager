@@ -44,7 +44,7 @@ def device_list(request):
         if device_serializer.is_valid():
             device = device_serializer.save()
             # Schedule a refresh every 15 minutes
-            device.schedule = schedule('devices.utils.scheduled_refresh', mac=mac, \
+            device.schedule = schedule('devices.views.scheduled_refresh', mac=mac, \
                 schedule_type='I', minutes=15)
             device.save()
             return JsonResponse(device_serializer.data, status=201)

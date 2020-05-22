@@ -14,7 +14,7 @@ class Device(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
     notes = models.TextField()
-    download_task = models.CharField(max_length=32, default="")
+    downloading = models.BooleanField(default=False)
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
         on_delete=models.CASCADE)
     next_path = models.CharField(max_length=16, default="")
@@ -23,92 +23,68 @@ class Device(models.Model):
     def status(self):
         return verify_mac(self.mac, self.ip)
 
+
     def scheduled_refresh(self):
         """
         The method to be called for a scheduled refresh.
 
-        Schedule creates its own asynchronous task, so load_data() is called synchronously here.
+        Schedule creates its own asynchronous task, so lock_and_load() is called synchronously here.
         """
         # First make sure that the device has a schedule associated with it
         if self.schedule is None:
             return ["This device has no associated schedule."]
-        # If the lock didn't get released but the task is finished, ignore it
-        if self.download_task == "" or result(self.download_task) is not None:
-            self.download_task = Task.objects.latest('started').id
-            self.save()
+        if not self.downloading:
+            task_id = Task.objects.latest('started').id
 
-            load_result = self.load_data()
-            self.finish_download(fetch(self.download_task))
+            load_result = self.lock_and_load()
+            self.finish_download(fetch(task_id))
             return load_result
         return "The device is already downloading."
 
     def refresh_data(self, reload_data=False):
         """
-        Asynchronous wrapper method for load_data()
+        Asynchronous wrapper method for lock_and_load()
         """
-        # If the lock didn't get released but the task is finished, ignore it
-        if self.download_task == "" or result(self.download_task) is not None:
-            self.download_task = async_task(self.load_data, hook=self.finish_download, \
-                reload_data=reload_data)
-            self.save()
+        if not self.downloading:
+            async_task(self.lock_and_load, hook=self.finish_download, reload_data=reload_data)
 
-    def load_data(self, start_path=None, reload_data=False):
+
+    def lock(self):
+        "Acquire a lock for downloading."
+        self.downloading = True
+        self.save()
+
+    def unlock(self):
+        "Release the download lock."
+        self.downloading = False
+        self.save()
+
+
+    def lock_and_load(self, start_path=None, reload_data=False):
         """
-        Checks every file on the device for new data starting at the specified date.
-        If reload is True, deletes existing data before reloading
-
-        Returns a list of inaccessible endpoints, or a list containing the single last endpoint
+        Wrapper method for load_data()
+        Acquires a lock and releases it in the event of an unhandled exception.
         """
-        # We can't use self for default argument
-        if start_path is None:
-            start_path = self.next_path
+        try:
+            # Acquire the lock
+            self.lock()
 
-        if self.status == 0:
-            # We return the start_path as the first element
-            # so that it remains as such during cleanup.
-            return [start_path, "Error: The device is offline."]
-        if self.status == 2:
-            return [start_path, "Error: The device address has changed. Update IP address."]
+            # Attempt to download
+            return load_data(self, start_path, reload_data)
 
-        # Delete all existing data if a full reload is requested
-        if reload_data:
-            Datum.objects.filter(device=self).delete()
+        except:
+            # Release the lock
+            self.unlock()
 
-        # Get the base URL from the device's IP
-        base_url = f"http://{self.ip}/data"
-
-        # Ensure that our starting point has four values, even if the provided path is incomplete
-        start_at = [0, 0, 0, 0]
-
-        # Update starting point to match path
-        endpoints = start_path.split('/')
-        for idx in range(min(len(endpoints), 4)):
-            # Only accept valid integers for endpoints
-            try:
-                endpoint = int(endpoints[idx])
-            except (ValueError, TypeError):
-                endpoint = 0
-            start_at[idx] += endpoint
-
-        # We will fill this array with any paths for which we fail to download data
-        missed_paths = []
-
-        # Begin recursion
-        last_path = load_data_recursive(self, start_at, base_url, missed_paths)
-
-        # If we didn't miss any paths, the last path becomes the next one with which to start
-        if not missed_paths:
-            missed_paths.append(last_path)
-
-        return missed_paths
+            # Re-raise the exception, like the responsible programmers we are
+            raise
 
     def finish_download(self, task):
         # Release the lock
-        self.download_task = ""
+        self.downloading = False
 
         # Update the next path
         self.next_path = task.result[0]
-
         self.save()
 
 def verify_mac(mac, address):
@@ -129,6 +105,56 @@ def verify_mac(mac, address):
         return 1
 
     return 2
+
+def load_data(device, start_path=None, reload_data=False):
+    """
+    Checks every file on the device for new data starting at the specified date.
+    If reload is True, deletes existing data before reloading
+
+    Returns a list of inaccessible endpoints, or a list containing the single last endpoint
+    """
+    # We can't use self for default argument
+    if start_path is None:
+        start_path = device.next_path
+
+    if device.status == 0:
+        # We return the start_path as the first element
+        # so that it remains as such during cleanup.
+        return [start_path, "Error: The device is offline."]
+    if device.status == 2:
+        return [start_path, "Error: The device address has changed. Update IP address."]
+
+    # Delete all existing data if a full reload is requested
+    if reload_data:
+        Datum.objects.filter(device=device).delete()
+
+    # Get the base URL from the device's IP
+    base_url = f"http://{device.ip}/data"
+
+    # Ensure that our starting point has four values, even if the provided path is incomplete
+    start_at = [0, 0, 0, 0]
+
+    # Update starting point to match path
+    endpoints = start_path.split('/')
+    for idx in range(min(len(endpoints), 4)):
+        # Only accept valid integers for endpoints
+        try:
+            endpoint = int(endpoints[idx])
+        except (ValueError, TypeError):
+            endpoint = 0
+        start_at[idx] += endpoint
+
+    # We will fill this array with any paths for which we fail to download data
+    missed_paths = []
+
+    # Begin recursion
+    last_path = load_data_recursive(device, start_at, base_url, missed_paths)
+
+    # If we didn't miss any paths, the last path becomes the next one with which to start
+    if not missed_paths:
+        missed_paths.append(last_path)
+
+    return missed_paths
 
 def load_csv(address, device):
     """
