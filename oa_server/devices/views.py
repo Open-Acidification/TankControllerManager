@@ -64,7 +64,7 @@ def device_detail(request, mac):
     except Device.DoesNotExist:
         return HttpResponse("There is no device with the specified MAC address.", status=404)
 
-    # Update the specified time series
+    # Update the specified device
     if request.method == 'PUT':
         data = JSONParser().parse(request)
         data['mac'] = mac
@@ -74,9 +74,14 @@ def device_detail(request, mac):
             return JsonResponse(device_serializer.data)
         return JsonResponse(device_serializer.errors, status=400)
 
-    # Delete the specified time series
+    # Delete the specified device
     if request.method == 'DELETE':
-        device.delete()
+        if device.schedule is None:
+            device.delete()
+        else:
+            # This will conveniently delete both the device and its
+            # schedule, since on_delete is set to CASCADE
+            device.schedule.delete()
         return HttpResponse(status=204)
 
     # Read the specified device (GET)
