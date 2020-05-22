@@ -1,10 +1,59 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, JsonResponse
 from django.db import connection
-from tanks.serializers import TankHistorySerializer
+from tanks.serializers import TankHistorySerializer, TankStatusSerializer
 from devices.models import Device, Datum
+from devices.serializers import DatumSerializer
 from devices.views import get_constraints, query_data, create_csv
+
+@require_http_methods(["GET"])
+def get_tanks(request):
+    """
+    Returns a list of all tanks and their status, each with its most recent device.
+    """
+    # Django ORM doesn't support DISTINCT ON
+    tanks = Datum.objects.raw("""\
+        SELECT DISTINCT ON (d.tankid) *
+        FROM (
+            SELECT * FROM devices_datum
+            ORDER BY time DESC
+        ) AS d
+        ORDER BY d.tankid;
+    """)
+    status_serializer = TankStatusSerializer(tanks, many=True)
+    return JsonResponse(status_serializer.data, safe=False)
+
+@csrf_exempt
+@require_http_methods(["GET", "DELETE"])
+def manage_tank(request, tankid):
+    """
+    Wrapper for tank GET and DELETE requests
+    """
+    if request.method == 'GET':
+        return get_tank(tankid)
+
+    # if request.method == 'DELETE':
+    return delete_tank(tankid)
+
+def get_tank(tankid):
+    """
+    Returns the status of the specified tank, along with its most recent device.
+    """
+    tank = Datum.objects.filter(tankid=tankid).order_by('-time')[0]
+    if tank is None:
+        return HttpResponse("There is no tank with the specified ID.", status=404)
+
+    status_serializer = TankStatusSerializer(tank)
+    return JsonResponse(status_serializer.data, safe=False)
+
+def delete_tank(tankid):
+    """
+    Deletes all data from the specified tank.
+    """
+    Datum.objects.filter(tankid=tankid).delete()
+    return HttpResponse(status=204)
 
 @require_http_methods(["GET"])
 def get_tank_data(request, tankid):

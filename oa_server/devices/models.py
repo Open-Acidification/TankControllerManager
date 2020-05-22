@@ -7,15 +7,13 @@ import requests
 from django.db import models, utils
 from django_q.tasks import async_task, result, fetch
 from django_q.models import Task, Schedule
-from devices.utils import get_tankid, get_mac
+from devices.utils import get_mac
 
 class Device(models.Model):
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
     mac = models.CharField(max_length=17, primary_key=True)
-    tankid = models.IntegerField(default=-1)
     notes = models.TextField()
-
     download_task = models.CharField(max_length=32, default="")
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
         on_delete=models.CASCADE)
@@ -23,15 +21,7 @@ class Device(models.Model):
 
     @property
     def status(self):
-        self.update_tankid()
         return verify_mac(self.mac, self.ip)
-
-    def update_tankid(self):
-        try:
-            self.tankid = get_tankid(self.ip)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError):
-            pass
-        self.save()
 
     def scheduled_refresh(self):
         """
