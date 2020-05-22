@@ -1,5 +1,6 @@
 from django.apps import AppConfig
-from psycopg2 import OperationalError
+import psycopg2
+import django.db.utils
 
 class DevicesConfig(AppConfig):
     name = 'devices'
@@ -15,5 +16,5 @@ class DevicesConfig(AppConfig):
             # but this is the only way to ensure that all locks are released.
             for device in Device.objects.all():
                 device.unlock()
-        except OperationalError:
+        except (psycopg2.OperationalError, django.db.utils.OperationalError):
             pass
