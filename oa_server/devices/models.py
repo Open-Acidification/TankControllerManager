@@ -118,11 +118,11 @@ class Device(models.Model):
                     # If this path still fails to download, re-add it to the missed paths
                     missed_paths.append(raw_path)
 
-            # Save and return the paths we're still missing
-            self.missed_paths = missed_paths
-            self.save()
+        # Save and return the paths we're still missing
+        self.missed_paths = missed_paths
+        self.save()
 
-            return missed_paths
+        return missed_paths
 
 def verify_mac(mac, address):
     """
@@ -171,6 +171,7 @@ def load_data(device, start_path=None, reload_data=False):
 
     # Ensure that our starting point has five values, even if the provided path is incomplete
     start_at = path_as_list(start_path)['path']
+    print(start_at)
 
     # We will fill this array with any paths for which we fail to download data
     new_missed_paths = []
@@ -178,9 +179,10 @@ def load_data(device, start_path=None, reload_data=False):
     # Begin recursion
     last_path = load_data_recursive(device, start_at, base_url, new_missed_paths)
 
-    old_missed_paths = device.retry_paths()
+    missed_paths = device.retry_paths()
+    missed_paths.extend(new_missed_paths)
 
-    return {'missed': old_missed_paths + new_missed_paths, 'next': last_path}
+    return {'missed': missed_paths, 'next': last_path}
 
 # Pylint requires five or fewer arguments in order to encourage refactoring,
 # but that's not really relevant here.
@@ -189,6 +191,7 @@ def load_data_recursive(device, start_at, base_url, missed_paths, path='', level
     """
     Recursive helper function for load_data()
     """
+    print("Level: "+str(level)+", path: "+path)
     if level < 4:
         # We need to go deeper
         directories = json_to_object(base_url + path)
@@ -199,7 +202,7 @@ def load_data_recursive(device, start_at, base_url, missed_paths, path='', level
             return path
 
         # Define the last path visited by this branch
-        last_path = ''
+        last_path = device.next_path
         for directory in directories:
             # Skip directories that come before our starting point
             if int(directory) < start_at[level]:
