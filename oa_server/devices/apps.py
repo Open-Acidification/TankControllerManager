@@ -16,5 +16,7 @@ class DevicesConfig(AppConfig):
             # but this is the only way to ensure that all locks are released.
             for device in Device.objects.all():
                 device.unlock()
-        except (psycopg2.OperationalError, django.db.utils.OperationalError):
+        except (psycopg2.OperationalError, django.db.utils.OperationalError, \
+            django.db.utils.ProgrammingError):
+            # The devices table hasn't been created yet
             pass

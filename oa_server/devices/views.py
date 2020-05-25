@@ -130,7 +130,7 @@ def get_constraints(request):
         pass
 
     ## Number constraints ##
-    freq = abs(int(request.GET.get('freq', default=0))) # Implementation currently unknown
+    freq = abs(int(request.GET.get('freq', default=0)))
     cutoff = int(request.GET.get('cutoff', default=0))
     total = abs(int(request.GET.get('total', default=0)))
 
