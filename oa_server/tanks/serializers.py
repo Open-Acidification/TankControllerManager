@@ -10,6 +10,16 @@ class TankHistorySerializer(serializers.Serializer):
     time = serializers.DateTimeField()
     mac = serializers.CharField(max_length=17)
 
+class TankSparklineDataSerializer(serializers.Serializer):
+    time = serializers.ListField(child=serializers.DateTimeField(), required=False)
+    temp = serializers.ListField(child=serializers.FloatField())
+    pH = serializers.ListField(child=serializers.FloatField())
+
+class TankSparklineSerializer(serializers.Serializer):
+    tankid = serializers.IntegerField()
+    sparklines = TankSparklineDataSerializer()
+    error = serializers.CharField(required=False)
+
 class TankStatusSerializer(serializers.ModelSerializer):
     last_update = serializers.DateTimeField(source='time')
     device_name = serializers.SerializerMethodField()

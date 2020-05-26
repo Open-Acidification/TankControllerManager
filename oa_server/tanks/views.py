@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
+import pytz
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, JsonResponse
 from django.db import connection
-from tanks.serializers import TankHistorySerializer, TankStatusSerializer
+from django.utils import timezone
+from tanks.serializers import TankHistorySerializer, TankStatusSerializer, TankSparklineSerializer
 from devices.models import Device, Datum
 from devices.serializers import DatumSerializer
 from devices.views import get_constraints, query_data, create_csv
@@ -110,3 +113,46 @@ def dictfetchall(cursor):
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
+
+@require_http_methods(["GET"])
+def get_tank_sparklines(request, tankid):
+    """
+    Returns a response containing the history of the tanks's temp and pH over the last 24 hours.
+    """
+    # Sanitize tankid
+    tankid = int(tankid)
+
+    constraints = {
+        'start': pytz.utc.localize(datetime.min),
+        'end': timezone.now(),
+        'freq': None,
+        'cutoff': -10000,
+        'total': 24
+    }
+
+    response = {
+        'tankid': tankid,
+        'sparklines': {
+            'temp': [],
+            'pH': []
+        }
+    }
+
+    if request.GET.get('includeTime', default=False):
+        response['sparklines']['time'] = []
+
+    try:
+        data = query_data(constraints, tankid=tankid)
+    except ValueError:
+        data = []
+        response['error'] = "The specified tank does not have enough data to generate sparklines."
+
+    for row in data:
+        if request.GET.get('includeTime', default=False):
+            response['sparklines']['time'].append(row['time'])
+        response['sparklines']['temp'].append(row['temp'])
+        response['sparklines']['pH'].append(row['pH'])
+
+    sparkline_serializer = TankSparklineSerializer(response)
+
+    return JsonResponse(sparkline_serializer.data, safe=False)

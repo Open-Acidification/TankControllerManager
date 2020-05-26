@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 from rest_framework.parsers import JSONParser
 from rest_framework_csv.renderers import CSVRenderer
 from django_q.tasks import schedule, result
@@ -117,7 +118,7 @@ def get_constraints(request):
     """
     ## Time constraints ##
     start = request.GET.get('start', default=pytz.utc.localize(datetime.min))
-    end = request.GET.get('end', default=pytz.utc.localize(datetime.utcnow()))
+    end = request.GET.get('end', default=timezone.now())
 
     # Convert parameters to datetime if not already
     try:

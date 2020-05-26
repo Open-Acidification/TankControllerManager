@@ -12,7 +12,7 @@ from devices.utils import get_mac
 
 class Device(models.Model):
     name = models.CharField(max_length=32)
-    ip = models.GenericIPAddressField(protocol='IPv4', unique=True)
+    ip = models.GenericIPAddressField(protocol='IPv4')
     mac = models.CharField(max_length=17, primary_key=True)
     notes = models.TextField()
     downloading = models.BooleanField(default=False)
@@ -86,7 +86,8 @@ class Device(models.Model):
         self.downloading = False
 
         # Update the next path
-        self.next_path = result['next']
+        if result['next']:
+            self.next_path = result['next']
         self.missed_paths = result['missed']
         self.save()
 
