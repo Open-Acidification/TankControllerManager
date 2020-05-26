@@ -4,6 +4,8 @@ import VueRouter from 'vue-router'
 // Components
 import Devices from '../components/devices/Devices.vue'
 import DeviceConfig from '../components/devices/DeviceConfig.vue'
+import Tanks from '../components/tanks/Tanks.vue'
+import TankView from '../components/tanks/TankView.vue'
 
 Vue.use(VueRouter)
 
@@ -18,9 +20,21 @@ Vue.use(VueRouter)
     component: Devices,
     children: [
       {
-        path: ':mac/configure',
-        name: 'Device Configuration',
+        path: ':mac',
+        name: 'Device',
         component: DeviceConfig,
+      }
+    ],
+  },
+  {
+    path: '/tanks',
+    name: 'Tanks',
+    component: Tanks,
+    children: [
+      {
+        path: ':tankid',
+        name: 'Tank',
+        component: TankView,
       }
     ],
   }

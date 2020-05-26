@@ -21,9 +21,11 @@ export default {
 
   created() {
     this.$store.dispatch('updateDevices');
+    this.$store.dispatch('updateTanks');
 
     setInterval(function () {
       this.$store.dispatch('updateDevices');
+      this.$store.dispatch('updateTanks');
     }.bind(this), 30000); 
   }
 };

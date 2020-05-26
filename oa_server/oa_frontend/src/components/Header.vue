@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app color="primary" dark>
-    <div class="d-flex align-center">
+    <router-link to="/">
       <v-img
         alt="Open Acidification Logo"
         class="shrink mr-2"
@@ -9,9 +9,13 @@
         transition="scale-transition"
         width="40"
       />
-
-      <h1 class="display-1 condensed-light" contain min-width="100" width="100">CONTROL CENTER</h1>
-    </div>
+    </router-link>
+    <v-tabs fixed-tabs>
+      <v-tab to="/tanks">Tanks</v-tab>
+      <v-tab to="/devices">Devices</v-tab>
+      <v-tab to="/timeseries">Time Series</v-tab>
+    </v-tabs>
+    <v-spacer/>
   </v-app-bar>
 </template>
 

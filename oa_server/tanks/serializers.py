@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from devices.models import Device, Datum
 
@@ -22,13 +23,18 @@ class TankSparklineSerializer(serializers.Serializer):
 
 class TankStatusSerializer(serializers.ModelSerializer):
     last_update = serializers.DateTimeField(source='time')
+    minutes_ago = serializers.SerializerMethodField()
     device_name = serializers.SerializerMethodField()
     device_mac = serializers.SerializerMethodField()
 
     class Meta:
         model = Datum
-        fields = ['tankid', 'last_update', 'temp', 'temp_setpoint', 'pH', \
+        fields = ['tankid', 'last_update', 'minutes_ago', 'temp', 'temp_setpoint', 'pH', \
             'pH_setpoint', 'on_time', 'device_name', 'device_mac']
+
+    def get_minutes_ago(self, obj):
+        difference = timezone.now() - obj.time
+        return difference.seconds // 60
 
     def get_device_name(self, obj):
         return obj.device.name

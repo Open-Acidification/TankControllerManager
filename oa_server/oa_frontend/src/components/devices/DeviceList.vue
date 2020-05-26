@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-    expand-on-hover
+    :expand-on-hover="!($route.path == '/devices')"
     width=400
     v-model="sidebar"
     permanent
@@ -9,32 +9,26 @@
       class="overflow-hidden"
       dense
     >
-      <v-card
+      <div
         v-for="device in this.$store.state.devices"
         :key="device.mac"
       >
-        <v-list-item two-line>
+        <v-list-item :to="{path: '/devices/'+device.mac}" two-line>
           <v-list-item-content>
             <v-list-item-title class="headline mb-1">{{ device.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{ device.mac }}</v-list-item-subtitle>
+            <v-list-item-subtitle>
+              {{ device.mac }}
+            </v-list-item-subtitle>
+            <div>
+              <v-icon v-if="device.status == 0" color="error">mdi-close-network</v-icon>
+              <v-icon v-else-if="device.status == 1" color="success">mdi-check-network</v-icon>
+              <v-icon v-else color="warning">mdi-help-network</v-icon>
+            </div>
           </v-list-item-content>
         </v-list-item>
-        <v-card-actions>
-          <div>
-            <v-icon v-if="device.status == 0" color="red accent-4">mdi-close-network</v-icon>
-            <v-icon v-else-if="device.status == 1" color="light-green darken-3">mdi-check-network</v-icon>
-            <v-icon v-else color="yellow darken-1">mdi-help-network</v-icon>
-          </div>
-          <v-spacer/>
-          <v-btn icon>
-            <v-icon>mdi-poll</v-icon>
-          </v-btn>
-          <v-btn :to="{path: '/devices/'+device.mac+'/configure'}" icon>
-            <v-icon>mdi-wrench</v-icon>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-      <v-btn large color="green" width=400>Add Device</v-btn>
+        <v-divider/>
+      </div>
+      <v-btn large color="green lighten-1" block>Add Device</v-btn>
     </v-list>
   </v-navigation-drawer>
 </template>

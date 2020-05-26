@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
