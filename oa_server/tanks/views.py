@@ -65,12 +65,6 @@ def get_tank_data(request, tankid):
 
     Returns the data as a CSV file.
     """
-    # First, check if a device with the specified tank ID exists
-    try:
-        Device.objects.get(tankid=tankid)
-    except Device.DoesNotExist:
-        return HttpResponse("There is no device associated with the specified tank.", status=404)
-
     constraints = get_constraints(request)
 
     data = query_data(constraints, tankid=tankid)
