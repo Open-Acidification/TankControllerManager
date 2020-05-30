@@ -92,32 +92,27 @@ class Device(models.Model):
         self.save()
 
     def retry_paths(self):
+        print("Retrying previously missed paths:")
         # Fill this with the paths that still fail upon retry
         missed_paths = []
 
         # Revisit each path
-        for raw_path in self.missed_paths:
-            path = path_as_list(raw_path)
+        for path in self.missed_paths:
+            split_path = path_as_list(path)
 
-            level = path['depth']
-            path = path['path']
+            level = split_path['depth']
+            start_at = split_path['path']
 
-            base_url = f"http://{self.ip}/data"
+            # Don't include the page in the path
+            if level > 4:
+                level = 4
+                path = path.rsplit('/', 1)[0]
+
+            base_url = f"http://{self.ip}/data/"
 
             # We need to recursively visit all subpaths.
             # If any failures are encountered, they will be added to missed_paths
-            if level < 4:
-                load_data_recursive(self, path, base_url, missed_paths, level=level)
-
-            # We're already at a CSV path
-            else:
-                address = f"{base_url}/{path[0]}/{path[1]}/{path[2]}/{path[3]}?start=" \
-                    + str(int(path[4])*100) + "&num=100"
-                status = load_csv(address, self)
-
-                if not status:
-                    # If this path still fails to download, re-add it to the missed paths
-                    missed_paths.append(raw_path)
+            load_data_recursive(self, start_at, base_url, missed_paths, path, level)
 
         # Save and return the paths we're still missing
         self.missed_paths = missed_paths
@@ -168,7 +163,7 @@ def load_data(device, start_path=None, reload_data=False):
         Datum.objects.filter(device=device).delete()
 
     # Get the base URL from the device's IP
-    base_url = f"http://{device.ip}/data"
+    base_url = f"http://{device.ip}/data/"
 
     # Ensure that our starting point has five values, even if the provided path is incomplete
     start_at = path_as_list(start_path)['path']
@@ -213,9 +208,12 @@ def load_data_recursive(device, start_at, base_url, missed_paths, path='', level
             # stop skipping for future iterations
             start_at[level] = 0
 
+            # Avoid prepending path with '/'
+            child_path = directory if level == 0 else path+'/'+directory
+
             # Call the function for this subdirectory
             last_path = load_data_recursive(device, start_at, base_url, \
-                missed_paths, path+'/'+directory, level+1)
+                missed_paths, child_path, level+1)
 
         return last_path
 
@@ -311,7 +309,7 @@ def json_to_object(address):
 
 def path_as_list(path):
     """
-    Converts a path in the form of /year/month/day/hour/page to a list containing those elements.
+    Converts a path in the form of year/month/day/hour/page to a list containing those elements.
     """
     path_list = [0, 0, 0, 0, 0]
 
