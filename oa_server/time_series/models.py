@@ -2,6 +2,9 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 class TimeSeries(models.Model):
+    class Meta:
+        verbose_name_plural = "Time series"
+
     TS_TYPES = [
         ('P', 'pH'),
         ('T', 'Temperature'),

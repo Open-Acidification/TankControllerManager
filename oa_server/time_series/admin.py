@@ -1,3 +1,4 @@
 from django.contrib import admin
+from time_series.models import TimeSeries
 
-# Register your models here.
+admin.site.register(TimeSeries)

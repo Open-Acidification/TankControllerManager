@@ -14,6 +14,7 @@ from django_q.models import Schedule
 from devices.models import Device, Datum
 from devices.serializers import DeviceSerializer, DatumSerializer
 from devices.utils import get_mac, strip_mac
+from time_series.models import TimeSeries
 
 
 @csrf_exempt
@@ -206,6 +207,121 @@ def create_csv(data, download=False, identifier="", show_device=False):
         writer.writerow(datum)
 
     return response
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def manage_device_time_series(request, mac):
+    # First, check if specified device exists
+    try:
+        device = Device.objects.get(mac=mac)
+    except Device.DoesNotExist:
+        return HttpResponse("There is no device with the specified MAC address.", status=404)
+
+    if device.status != 1:
+        return HttpResponse(f"The device with MAC address {device.mac} is offline.", status=421)
+
+
+    if request.method == "GET":
+        return get_device_time_series(request, device.ip)
+
+    return post_device_time_series(request, device.ip)
+
+def get_device_time_series(request, device_ip):
+    try:
+        response = requests.get(f"http://{device_ip}/series", timeout=5)
+        response.raise_for_status()
+        return JsonResponse(response.json, status=200)
+    except requests.RequestException:
+        return HttpResponse("An error occured when attempting to request the time series.", \
+            status=400)
+
+def post_device_time_series(request, device_ip):
+    # If raw JSON provided, pass it directly to the device.
+    raw_json = request.body.decode('utf-8')
+    if raw_json[0] == '{':
+        try:
+            response = requests.post(f"http://{device_ip}/series", data=request.body, timeout=5)
+            response.raise_for_status()
+
+            # Actually, pylint, this is the correct way to go about this,
+            # since we're returning raw (unserialized) JSON
+            #pylint: disable=http-response-with-content-type-json
+            message = HttpResponse(request.body, content_type='application/json', status=200)
+        except requests.RequestException:
+            message = HttpResponse("An error occured when attempting to upload time series.", \
+                status=400)
+        return message
+
+    # Otherwise, use time series IDs specified in form data
+    ts_params = get_time_series_form_data(request)
+
+    if ts_params['error'] is not None:
+        return ts_params['error']
+
+    # Create the object containing both time series
+    time_series = {
+        'pH': {
+            'value': ts_params['ph_ts'].value,
+            'time': ts_params['ph_ts'].time,
+            'interval': ts_params['ph_ts'].interval,
+            'delay': ts_params['ph_delay']
+        },
+        'temp': {
+            'value': ts_params['temp_ts'].value,
+            'time': ts_params['temp_ts'].time,
+            'interval': ts_params['temp_ts'].interval,
+            'delay': ts_params['temp_delay']
+        }
+    }
+
+    # Post the time series object to the device
+    try:
+        response = requests.post(f"http://{device_ip}/series", json=time_series, timeout=5)
+        response.raise_for_status()
+        return JsonResponse(time_series, status=200)
+    except requests.RequestException:
+        return HttpResponse("An error occured when attempting to upload time series.", status=400)
+
+def get_time_series_form_data(request):
+    error = None
+    try:
+        ph_id = int(request.POST.__getitem__('ph_id'))
+        ph_ts = TimeSeries.objects.get(id=ph_id, type='P')
+    except KeyError:
+        error = HttpResponse("You must specify ph_id.", status=400)
+    except ValueError:
+        error = HttpResponse("ph_id must be an integer.", status=400)
+    except TimeSeries.DoesNotExist:
+        error = HttpResponse("There is no pH time series with the specified ID.", status=404)
+    if error is not None:
+        return {'error': error}
+
+    try:
+        temp_id = int(request.POST.__getitem__('temp_id'))
+        temp_ts = TimeSeries.objects.get(id=temp_id, type='T')
+    except KeyError:
+        error = HttpResponse("You must specify temp_id.", status=400)
+    except ValueError:
+        error = HttpResponse("temp_id must be an integer.", status=400)
+    except TimeSeries.DoesNotExist:
+        error = HttpResponse("There is no temp time series with the specified ID.", status=404)
+    if error is not None:
+        return {'error': error}
+
+    try:
+        ph_delay = int(request.POST.get('ph_delay', default=0))
+    except ValueError:
+        error = HttpResponse("ph_delay must be an integer.", status=400)
+        return {'error': error}
+
+    try:
+        temp_delay = int(request.POST.get('temp_delay', default=0))
+    except ValueError:
+        error = HttpResponse("temp_delay must be an integer.", status=400)
+        return {'error': error}
+
+    return {'ph_ts': ph_ts, 'ph_delay': ph_delay, 'temp_ts': temp_ts, 'temp_delay': temp_delay, \
+        'error': error}
 
 def scheduled_refresh(mac):
     """
