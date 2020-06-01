@@ -26,6 +26,24 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    waitForDevices (context) {
+      return new Promise((resolve) => {
+        function waitForDevices() {
+          if (context.state.devices) return resolve();
+          setTimeout(waitForDevices, 100);
+        }
+        waitForDevices();
+      });
+    },
+    waitForTanks (context) {
+      return new Promise((resolve) => {
+        function waitForTanks() {
+          if (context.state.tanks) return resolve();
+          setTimeout(waitForTanks, 100);
+        }
+        waitForTanks();
+      });
+    },
     updateDevices (context) {
       axios
         .get('http://localhost:8080/api/devices/')
