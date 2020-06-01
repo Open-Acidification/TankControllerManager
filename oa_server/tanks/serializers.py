@@ -50,4 +50,4 @@ class TankStatusSerializer(serializers.ModelSerializer):
     # In this specific case, we're going to ignore snake casing
     #pylint: disable=invalid-name
     def get_pH_danger(self, obj):
-        return obj.get_ph_deviation()
+        return obj.get_pH_deviation()
