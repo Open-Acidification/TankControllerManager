@@ -6,7 +6,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ['mac', 'name', 'ip', 'status', 'notes']
+        fields = ['mac', 'name', 'ip', 'status', 'ph_variance', 'temp_variance', 'notes']
 
 class DatumSerializer(serializers.ModelSerializer):
     class Meta:

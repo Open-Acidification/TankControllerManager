@@ -11,10 +11,14 @@ from django_q.models import Task, Schedule
 from devices.utils import get_mac
 
 class Device(models.Model):
+    # User-visible fields
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(protocol='IPv4')
     mac = models.CharField(max_length=17, primary_key=True)
+    ph_variance = models.FloatField(default=1)
+    temp_variance = models.FloatField(default=5)
     notes = models.TextField()
+    # Internal fields
     downloading = models.BooleanField(default=False)
     schedule = models.ForeignKey(Schedule, blank=True, null=True, \
         on_delete=models.CASCADE)
@@ -341,3 +345,41 @@ class Datum(models.Model):
     pH = models.FloatField()
     pH_setpoint = models.FloatField()
     on_time = models.IntegerField()
+
+    # In this specific case, we're going to ignore snake casing
+    #pylint: disable=invalid-name
+    def get_pH_deviation(self):
+        """
+        Tells by how much we are deviating from the pH setpoint, relative to the threshold.
+
+        Doesn't return the deviation itself, but rather deviation divided by the threshold.
+        """
+        deviation = abs(self.pH - self.pH_setpoint)
+
+        # Prevent ourselves from dividing by zero!
+        if self.device.ph_variance == 0:
+            if deviation == 0:
+                # Perfect!
+                return 0
+            # Something really bad
+            return 10000
+
+        return round(deviation / self.device.ph_variance, 3)
+
+    def get_temp_deviation(self):
+        """
+        Tells by how much we are deviating from the temp setpoint, relative to the threshold.
+
+        Doesn't return the deviation itself, but rather deviation divided by the threshold.
+        """
+        deviation = abs(self.temp - self.temp_setpoint)
+
+        # Prevent ourselves from dividing by zero!
+        if self.device.temp_variance == 0:
+            if deviation == 0:
+                # Perfect!
+                return 0
+            # Something really bad
+            return 10000
+
+        return round(deviation / self.device.temp_variance, 3)

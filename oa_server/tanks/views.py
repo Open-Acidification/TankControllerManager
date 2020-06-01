@@ -16,15 +16,7 @@ def get_tanks(request):
     """
     Returns a list of all tanks and their status, each with its most recent device.
     """
-    # Django ORM doesn't support DISTINCT ON
-    tanks = Datum.objects.raw("""\
-        SELECT DISTINCT ON (d.tankid) *
-        FROM (
-            SELECT * FROM devices_datum
-            ORDER BY time DESC
-        ) AS d
-        ORDER BY d.tankid;
-    """)
+    tanks = Datum.objects.order_by('tankid', '-time').distinct('tankid')
     status_serializer = TankStatusSerializer(tanks, many=True)
     return JsonResponse(status_serializer.data, safe=False)
 

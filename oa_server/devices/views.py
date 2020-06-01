@@ -38,9 +38,12 @@ def device_list(request):
             return HttpResponse(err, status=421)
 
         name = request.POST.get('name', default='Unnamed')
+        ph_variance = request.POST.get('pH_variance', default=1.0)
+        temp_variance = request.POST.get('temp_variance', default=5.0)
         notes = request.POST.get('notes', default='N/A')
 
-        data = {'name': name, 'ip': address, 'mac': mac, 'notes': notes}
+        data = {'name': name, 'ip': address, 'mac': mac, \
+            'ph_variance': ph_variance, 'temp_variance': temp_variance, 'notes': notes}
 
         device_serializer = DeviceSerializer(data=data)
         if device_serializer.is_valid():

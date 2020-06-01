@@ -26,11 +26,13 @@ class TankStatusSerializer(serializers.ModelSerializer):
     minutes_ago = serializers.SerializerMethodField()
     device_name = serializers.SerializerMethodField()
     device_mac = serializers.SerializerMethodField()
+    temp_danger = serializers.SerializerMethodField()
+    pH_danger = serializers.SerializerMethodField()
 
     class Meta:
         model = Datum
-        fields = ['tankid', 'last_update', 'minutes_ago', 'temp', 'temp_setpoint', 'pH', \
-            'pH_setpoint', 'on_time', 'device_name', 'device_mac']
+        fields = ['tankid', 'last_update', 'minutes_ago', 'temp', 'temp_setpoint', 'temp_danger', \
+            'pH', 'pH_setpoint', 'pH_danger', 'on_time', 'device_name', 'device_mac']
 
     def get_minutes_ago(self, obj):
         difference = timezone.now() - obj.time
@@ -41,3 +43,11 @@ class TankStatusSerializer(serializers.ModelSerializer):
 
     def get_device_mac(self, obj):
         return obj.device.mac
+
+    def get_temp_danger(self, obj):
+        return obj.get_temp_deviation()
+
+    # In this specific case, we're going to ignore snake casing
+    #pylint: disable=invalid-name
+    def get_pH_danger(self, obj):
+        return obj.get_ph_deviation()
