@@ -9,7 +9,6 @@
 
 <script>
 import DeviceList from './DeviceList'
-// import DeviceDetails from './components/devices/DeviceDetails'
 
 export default {
   name: 'Devices',

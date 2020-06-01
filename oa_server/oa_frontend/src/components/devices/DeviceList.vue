@@ -2,7 +2,6 @@
   <v-navigation-drawer
     :expand-on-hover="!($route.path == '/devices')"
     width=400
-    v-model="sidebar"
     permanent
   >
     <v-list
@@ -37,7 +36,6 @@
 
 export default {
   name: 'DeviceList',
-  props: ["devices"],
 }
 </script>
 

@@ -23,10 +23,6 @@ export default new Vuex.Store({
     },
     setTanks (state, tanks) {
       state.tanks = tanks;
-    },
-    setSparklines (state, sparklines) {
-      var tank = state.tanks.find(tank => tank.tankid == sparklines.tankid);
-      tank.sparklines = sparklines.sparklines;
     }
   },
   actions: {
@@ -39,14 +35,19 @@ export default new Vuex.Store({
       axios
         .get('http://localhost:8080/api/tanks/')
         .then(function(response) {
-          context.commit('setTanks', response.data);
-          // Add the sparklines to each tank
-          context.state.tanks.forEach(tank => {
+          var tanks = response.data;
+          var sparklineRequests = [];
+          // Format date and define Sparkline requests
+          tanks.forEach(tank => {
             tank.last_update = new Date(tank.last_update + " UTC");
-            axios
-              .get('http://localhost:8080/api/tanks/'+tank.tankid+'/sparklines')
-              .then(response => (tank.sparklines = response.data.sparklines));
+            sparklineRequests.push(axios.get('http://localhost:8080/api/tanks/'+tank.tankid+'/sparklines'))
           });
+          axios.all(sparklineRequests).then(axios.spread((...responses) => {
+            for (var i = 0; i < tanks.length; i++) {
+              tanks[i].sparklines = responses[i].data.sparklines;
+            }
+            context.commit('setTanks', tanks);
+          }));
         });
     }
   },

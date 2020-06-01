@@ -2,7 +2,6 @@
   <v-navigation-drawer
     :expand-on-hover="!($route.path == '/tanks')"
     width=400
-    v-model="sidebar"
     permanent
   >
     <v-list
@@ -24,8 +23,6 @@ import TankCard from './TankCard.vue'
 
 export default {
   name: 'TankList',
-
-  props: ["tanks"],
 
   components: {
     TankCard,
