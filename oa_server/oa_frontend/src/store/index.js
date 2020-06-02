@@ -11,28 +11,49 @@ export default new Vuex.Store({
   },
   getters: {
     getDevice: (state) => (mac) => {
-      return state.devices.find(device => device.mac == mac);
+      if (state.devices) {
+        return state.devices.find(device => device.mac == mac);
+      }
+      return undefined;
     },
     getTank: (state) => (id) => {
-      return state.tanks.find(tank => tank.tankid == id);
+      if (state.tanks) {
+        return state.tanks.find(tank => tank.tankid == id);
+      }
+      return undefined;
     }
   },
   mutations: {
     setDevices (state, devices) {
       state.devices = devices;
     },
+    removeDevice (state, device) {
+      var index = state.devices.indexOf(device);
+      // Only remove if we actually found it
+      if (index >= 0) {
+        state.devices.splice(index, 1);
+      }
+    },
     setTanks (state, tanks) {
       state.tanks = tanks;
     }
   },
   actions: {
-    waitForDevices (context) {
-      return new Promise((resolve) => {
-        function waitForDevices() {
-          if (context.state.devices) return resolve();
-          setTimeout(waitForDevices, 100);
+    getDeviceWhenAvailable (context, mac) {
+      return new Promise((resolve, reject) => {
+        function waitForDevice(times=0) {
+          var device = context.getters.getDevice(mac)
+          if (device) {
+            return resolve(device);
+          }
+          if (times > 75) {
+            return reject(new Error("Could not find Device with specified MAC address "+mac));
+          }
+          setTimeout(function() {
+            waitForDevice(times+1);
+          }, 100);
         }
-        waitForDevices();
+        waitForDevice(0);
       });
     },
     waitForTanks (context) {

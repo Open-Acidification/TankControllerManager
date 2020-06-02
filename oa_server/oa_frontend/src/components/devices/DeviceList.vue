@@ -27,7 +27,12 @@
         </v-list-item>
         <v-divider/>
       </div>
-      <v-btn large color="green lighten-1" block>Add Device</v-btn>
+      <v-btn
+        to="/devices/add"
+        large
+        color="secondary"
+        class="black--text"
+        block>Add Device</v-btn>
     </v-list>
   </v-navigation-drawer>
 </template>

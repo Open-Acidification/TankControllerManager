@@ -1,15 +1,41 @@
 <template>
   <v-content class="pa-4 ma-0 fill-height">
-    <div v-if="device">
-      <h3>
-        Configure device with MAC address {{ device.mac }}:
-      </h3>
+    <div v-if="device ">
       <v-form
         ref="update_form"
         v-model="valid"
         lazy-validation
       >
         <v-container>
+          <v-row class="align-center pa-0" no-gutters>
+            <v-col md="auto">
+              <h3>
+                Configure device with MAC address {{ device.mac }}
+              </h3>
+            </v-col>
+            <v-spacer/>
+            <v-col md="auto">
+              <v-dialog v-model="confirmRemoval" persistent max-width="290">
+                <template v-slot:activator="{ on }">
+                  <v-btn icon v-on="on">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title class="headline">Remove device?</v-card-title>
+                  <v-card-text>
+                    Are you sure you want to remove the device "{{device.name}}"?
+                    Doing so will delete all of its stored data.
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" text @click="confirmRemoval = false">Cancel</v-btn>
+                    <v-btn color="primary" text @click="removeDevice">Remove Device</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </v-col>
+          </v-row>
           <v-row>
             <v-text-field
               v-model="name"
@@ -86,11 +112,18 @@
         Successfully updated device.
       </v-snackbar>
       <v-snackbar
-        v-model="errorSnackbar"
+        v-model="updateErrorSnackbar"
         bottom
         right
       >
         Something went wrong with updating device.
+      </v-snackbar>
+      <v-snackbar
+        v-model="removeErrorSnackbar"
+        bottom
+        right
+      >
+        Something went wrong with removing device.
       </v-snackbar>
     </div>
     <CenteredProgress v-else/>
@@ -131,7 +164,10 @@ export default {
       notes: '',
 
       successSnackbar: false,
-      errorSnackbar: false,
+      updateErrorSnackbar: false,
+      removeErrorSnackbar: false,
+
+      confirmRemoval: false,
     }
   },
   created () {
@@ -142,9 +178,13 @@ export default {
   },
   methods: {
     fetchDevice () {
-      this.$store.dispatch('waitForDevices').then(() => {
-        this.device = this.$store.getters.getDevice(this.$route.params.mac);
+      // Try to get the device by its MAC address as specified in the route
+      this.$store.dispatch('getDeviceWhenAvailable', this.$route.params.mac).then((device) => {
+        this.device = device;
         this.fillForm();
+      }).catch(() => {
+        // We couldn't find the device, so return to the main devices page
+        this.$router.push('/devices');
       });
     },
     resetForm () {
@@ -161,19 +201,36 @@ export default {
       this.axios.put(
         'http://localhost:8080/api/devices/'+this.device.mac+'/',
         {
-          "mac": this.device.mac,
-          "name": this.name,
-          "ip": this.ip,
-          "temp_variance": this.tempVariance,
-          "ph_variance": this.phVariance,
-          "notes": this.notes
+          mac: this.device.mac,
+          name: this.name,
+          ip: this.ip,
+          temp_variance: this.tempVariance,
+          ph_variance: this.phVariance,
+          notes: this.notes
         }
       ).then(() => {
         this.$store.dispatch('updateDevices');
         this.successSnackbar = true;
       }).catch((error) => {
         console.log(error);
-        this.errorSnackbar = true;
+        this.updateErrorSnackbar = true;
+      });
+    },
+    removeDevice () {
+      // Hide the dialog
+      this.confirmRemoval = false;
+      this.axios.delete(
+        'http://localhost:8080/api/devices/'+this.device.mac+'/'
+      ).then(() => {
+        // We've removed the device from the database, so remove it from the store
+        this.$store.commit('removeDevice', this.device)
+        // Then update the store just to make sure that we're in sync
+        this.$store.dispatch('updateDevices');
+        // Return to the main devices screen
+        this.$router.push('/devices')
+      }).catch((error) => {
+        console.log(error);
+        this.removeErrorSnackbar = true;
       });
     },
   }
