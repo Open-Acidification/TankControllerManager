@@ -78,6 +78,12 @@ class Device(models.Model):
             # Clean up after downloading and return the result
             self.finish_download(result)
             return result
+        except utils.IntegrityError:
+            # Likely due to an orphaned refresh task, so we'll ignore
+            # Release the lock
+            self.unlock()
+
+            return "The schedule no longer exists"
         except:
             # Release the lock
             self.unlock()
