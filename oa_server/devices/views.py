@@ -22,34 +22,32 @@ from time_series.models import TimeSeries
 def device_list(request):
     # Save the specified device
     if request.method == 'POST':
-        # Get the IP address. We'll verify its validity when we check the MAC
-        address = request.POST.get('ip', default=None)
+        # Get the data. We'll verify the IP address's validity when we check the MAC
+        data = JSONParser().parse(request)
+
+        # If the user forgot to specify the IP, fill it in with None
+        if 'ip' not in data:
+            data['ip'] = None
 
         # Get the MAC address, or return an error if the IP can't be reached
         try:
-            mac = get_mac(address)
-
+            data['mac'] = get_mac(data['ip'])
+        except KeyError:
+            # We'll just let the serializer complain about the missing fields
+            pass
         except requests.exceptions.ConnectionError:
-            return HttpResponse(f"The specified IP address {address} is invalid", status=421)
+            return HttpResponse(f"The specified IP address {data['ip']} is invalid", status=421)
         except requests.exceptions.Timeout:
-            return HttpResponse(f"The specified IP address {address}" + \
+            return HttpResponse(f"The specified IP address {data['ip']}" + \
                 " could not be reached in time", status=421)
         except ValueError as err:
             return HttpResponse(err, status=421)
-
-        name = request.POST.get('name', default='Unnamed')
-        ph_variance = request.POST.get('pH_variance', default=1.0)
-        temp_variance = request.POST.get('temp_variance', default=5.0)
-        notes = request.POST.get('notes', default='N/A')
-
-        data = {'name': name, 'ip': address, 'mac': mac, \
-            'ph_variance': ph_variance, 'temp_variance': temp_variance, 'notes': notes}
 
         device_serializer = DeviceSerializer(data=data)
         if device_serializer.is_valid():
             device = device_serializer.save()
             # Schedule a refresh every 15 minutes
-            device.schedule = schedule('devices.views.scheduled_refresh', mac=mac, \
+            device.schedule = schedule('devices.views.scheduled_refresh', mac=data['mac'], \
                 schedule_type='I', minutes=15)
             device.save()
             return JsonResponse(device_serializer.data, status=201)
