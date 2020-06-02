@@ -9,7 +9,7 @@
       <v-row class="align-center pa-0" no-gutters>
         <v-col>
           <v-card-text class="pt-0">
-            <span class="title">Tank {{addZero(tank.tankid)}}</span>
+            <span class="title">{{addZero(tank.tankid)}} (Tank ID)</span>
           </v-card-text>
         </v-col>
         <v-col class="text-right">

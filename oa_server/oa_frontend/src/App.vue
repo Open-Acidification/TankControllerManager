@@ -22,17 +22,19 @@ export default {
   created() {
     this.$store.dispatch('updateDevices');
     this.$store.dispatch('updateTanks');
+    this.$store.dispatch('updateTimeSeries');
 
     setInterval(function () {
       this.$store.dispatch('updateDevices');
       this.$store.dispatch('updateTanks');
-    }.bind(this), 30000); 
+      this.$store.dispatch('updateTimeSeries');
+    }.bind(this), 10000); 
   }
 };
 </script>
 
 <style>
   html {
-    overflow-y: hidden;
+    overflow-y: auto;
   }
 </style>

@@ -29,6 +29,13 @@ class Device(models.Model):
     def status(self):
         return verify_mac(self.mac, self.ip)
 
+    @property
+    def current_tank(self):
+        try:
+            return Datum.objects.filter(device=self).order_by('-time')[0].tankid
+        except IndexError:
+            return -1
+
 
     def scheduled_refresh(self):
         """

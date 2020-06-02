@@ -16,7 +16,7 @@
           <v-list-item-content>
             <v-list-item-title class="headline mb-1">{{ device.name }}</v-list-item-title>
             <v-list-item-subtitle>
-              {{ device.mac }}
+              {{ device.current_tank }} (Current Tank)
             </v-list-item-subtitle>
             <div>
               <v-icon v-if="device.status == 0" color="error">mdi-close-network</v-icon>

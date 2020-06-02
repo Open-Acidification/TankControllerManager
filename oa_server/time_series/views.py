@@ -41,10 +41,10 @@ def time_series_save(request):
 
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
-def time_series_detail(request, time_series_id):
+def time_series_detail(request, ts_id):
     # First, check if specified time series exists
     try:
-        series = TimeSeries.objects.get(id=time_series_id)
+        series = TimeSeries.objects.get(id=ts_id)
     except TimeSeries.DoesNotExist:
         return HttpResponse(status=404)
 

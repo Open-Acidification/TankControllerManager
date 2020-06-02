@@ -95,7 +95,7 @@
               <v-btn
                 color="error"
                 class="mr-4"
-                @click="resetForm"
+                @click="fillForm"
                 block
               >
                 Reset Form
@@ -187,9 +187,6 @@ export default {
         this.$router.push('/devices');
       });
     },
-    resetForm () {
-      this.fillForm();
-    },
     fillForm () {
       this.name = this.device.name;
       this.ip = this.device.ip;
@@ -198,8 +195,12 @@ export default {
       this.notes = this.device.notes;
     },
     updateDevice () {
+      this.$refs.create_form.validate();
+      if (!this.valid) {
+        return
+      }
       this.axios.put(
-        'http://localhost:8080/api/devices/'+this.device.mac+'/',
+        'http://'+location.hostname+':8080/api/devices/'+this.device.mac+'/',
         {
           mac: this.device.mac,
           name: this.name,
@@ -220,7 +221,7 @@ export default {
       // Hide the dialog
       this.confirmRemoval = false;
       this.axios.delete(
-        'http://localhost:8080/api/devices/'+this.device.mac+'/'
+        'http://'+location.hostname+':8080/api/devices/'+this.device.mac+'/'
       ).then(() => {
         // We've removed the device from the database, so remove it from the store
         this.$store.commit('removeDevice', this.device)

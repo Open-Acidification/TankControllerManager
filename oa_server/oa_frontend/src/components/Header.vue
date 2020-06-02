@@ -13,7 +13,7 @@
     <v-tabs fixed-tabs>
       <v-tab to="/tanks">Tanks</v-tab>
       <v-tab to="/devices">Devices</v-tab>
-      <v-tab to="/timeseries">Time Series</v-tab>
+      <v-tab to="/time_series">Time Series</v-tab>
     </v-tabs>
     <v-spacer/>
   </v-app-bar>

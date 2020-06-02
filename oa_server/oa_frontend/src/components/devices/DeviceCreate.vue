@@ -65,9 +65,9 @@
               @click="createDevice"
               block
             >
-            <v-dialog v-model="creating" persistent max-width="60">
-              <CenteredProgress/>
-            </v-dialog>
+              <v-dialog v-model="creating" persistent max-width="60">
+                <CenteredProgress/>
+              </v-dialog>
               Create Device
             </v-btn>
           </v-col>
@@ -135,9 +135,13 @@ export default {
       this.$refs.create_form.reset();
     },
     createDevice () {
+      this.$refs.create_form.validate();
+      if (!this.valid) {
+        return;
+      }
       this.creating = true;
       this.axios.post(
-        'http://localhost:8080/api/devices/',
+        'http://'+location.hostname+':8080/api/devices/',
         {
           ip: this.ip,
           name: this.name,

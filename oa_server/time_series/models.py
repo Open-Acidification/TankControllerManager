@@ -3,6 +3,7 @@ from django.db import models
 
 class TimeSeries(models.Model):
     class Meta:
+        unique_together = (('name', 'type'))
         verbose_name_plural = "Time series"
 
     TS_TYPES = [
