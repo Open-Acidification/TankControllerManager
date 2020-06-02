@@ -257,7 +257,7 @@ def post_device_time_series(request, device_ip):
     ts_params = get_time_series_form_data(request)
 
     if ts_params['error'] is not None:
-        return ts_params['error']
+        return HttpResponse(ts_params['error'], status=400)
 
     # Create the object containing both time series
     time_series = {

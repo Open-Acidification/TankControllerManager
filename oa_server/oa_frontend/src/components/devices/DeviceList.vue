@@ -5,7 +5,7 @@
     permanent
   >
     <v-list
-      class="overflow-hidden"
+      class="overflow-y-auto"
       dense
     >
       <div
