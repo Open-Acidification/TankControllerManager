@@ -207,7 +207,7 @@ export default {
         v => (v && v > 0 && v < 100) || 'Value must be between 0 and 100 °C',
       ],
       timeRules: [
-        v => (v && v >= 0) || 'Value must be at least 0 seconds',
+        v => (v >= 0) || 'Value must be at least 0 seconds',
       ],
 
       // Hold

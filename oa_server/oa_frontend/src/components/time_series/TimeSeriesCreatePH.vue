@@ -202,7 +202,7 @@ export default {
         v => (v && v >= 7 && v <= 14) || 'Value must be between 7 and 14, inclusive',
       ],
       timeRules: [
-        v => (v && v >= 0) || 'Value must be at least 0 seconds',
+        v => v >= 0 || 'Value must be at least 0 seconds',
       ],
 
       // Hold
@@ -220,7 +220,7 @@ export default {
       ],
       sineAmp: 1,
       ampRules: [
-        v => (v && v >= 0 && v <= 3.5) || 'Value must be between 0 and 3.5, inclusive',
+        v => (v >= 0 && v <= 3.5) || 'Value must be between 0 and 3.5, inclusive',
       ],
       sineOffX: 0,
       sineOffY: 8,

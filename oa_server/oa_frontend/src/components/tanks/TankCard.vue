@@ -106,7 +106,7 @@ export default {
 
       for (var i; i < 3; i++) {
         var difference = colorHigh[i] - colorLow[i];
-        colorNew[i] = colorLow[i] + difference * fade;
+        colorNew[i] = colorLow[i] + (difference * fade);
       }
       
       return colorNew;

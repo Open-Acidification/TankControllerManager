@@ -227,7 +227,7 @@ export default {
       tempVariance: 0.0,
       phVariance: 0.0,
       varianceRules: [
-        v => v && v >= 0 || 'Value must not be negative',
+        v => v >= 0 || 'Value must not be negative',
       ],
       notes: '',
 
@@ -236,7 +236,7 @@ export default {
       pHTimeSeriesID: -1,
       pHTimeSeriesDelay: 0,
       delayRules: [
-        v => v && v >= 0 || 'Delay must not be negative',
+        v => v >= 0 || 'Delay must not be negative',
       ],
 
       successSnackbar: false,

@@ -10,6 +10,7 @@ import TankView from '../components/tanks/TankView.vue'
 import TimeSeries from '../components/time_series/TimeSeries.vue'
 import TimeSeriesCreateTemp from '../components/time_series/TimeSeriesCreateTemp.vue'
 import TimeSeriesCreatePH from '../components/time_series/TimeSeriesCreatePH.vue'
+import TankChart from '../components/tanks/TankChart.vue'
 
 Vue.use(VueRouter)
 
@@ -44,6 +45,13 @@ Vue.use(VueRouter)
         path: ':tankid',
         name: 'Tank',
         component: TankView,
+        children: [
+          {
+            path: 'graph',
+            name: 'Chart',
+            component: TankChart,
+          }
+        ],
       }
     ],
   },
