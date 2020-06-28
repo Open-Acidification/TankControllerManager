@@ -1,4 +1,6 @@
-python3 manage.py makemigrations
-python3 manage.py migrate
+# Serve frontend
+
+
+# Serve backend
 python3 manage.py qcluster &
-python3 manage.py runserver 80
+python3 manage.py runserver 8080
