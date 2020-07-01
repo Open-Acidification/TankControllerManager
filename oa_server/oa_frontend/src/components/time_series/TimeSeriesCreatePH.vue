@@ -266,7 +266,7 @@ export default {
     createTimeSeries (endpoint, data) {
       this.creating = true;
       this.axios.post(
-        'http://'+location.hostname+':8080/api/time_series/ph'+endpoint,
+         'http://'+location.host+'/api/time_series/ph'+endpoint,
         data
       ).then((response) => {
         this.creating = false;

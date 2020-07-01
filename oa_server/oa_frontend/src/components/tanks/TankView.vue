@@ -126,7 +126,7 @@ export default {
       });
     },
     loadGraph () {
-      // this.axios.get('http://'+location.hostname+':8080/api/tanks/'+this.tank.tankid+
+      // this.axios.get('http://'+location.host+'/api/tanks/'+this.tank.tankid+
       //     '/data?freq='+this.freq+'&cutoff='+this.cutoff+'&total='+this.total,
       // ).then(() => {
 
@@ -136,7 +136,7 @@ export default {
     },
     downloadCSV () {
       this.axios({
-        url: 'http://'+location.hostname+':8080/api/tanks/'+this.tank.tankid+
+        url:  'http://'+location.host+'/api/tanks/'+this.tank.tankid+
           '/data?freq='+this.freq+'&cutoff='+this.cutoff+'&total='+this.total+'&download=1',
         method: 'GET',
         responseType: 'blob', // important

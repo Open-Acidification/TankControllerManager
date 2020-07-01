@@ -141,7 +141,7 @@ export default {
       }
       this.creating = true;
       this.axios.post(
-        'http://'+location.hostname+':8080/api/devices/',
+         'http://'+location.host+'/api/devices/',
         {
           ip: this.ip,
           name: this.name,

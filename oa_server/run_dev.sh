@@ -1,3 +1,4 @@
+#!/bin/bash
 # To be run within the Vagrant VM
 
 # Serve frontend

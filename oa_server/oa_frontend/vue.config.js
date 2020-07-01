@@ -8,7 +8,15 @@ module.exports = {
         "aggregateTimeout": 300,
         "poll": 1500
       },
-      "public": "0.0.0.0"
+      "public": "0.0.0.0",
+      "proxy": {
+        "/api": {
+          "target": "http://localhost:8080",
+        },
+        "/admin": {
+          "target": "http://localhost:8080",
+        }
+      },
     },
   },
   "pages": {

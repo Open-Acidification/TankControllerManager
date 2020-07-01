@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Build the frontend
 cd oa_frontend
 npm run build

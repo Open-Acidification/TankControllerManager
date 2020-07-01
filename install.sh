@@ -2,7 +2,7 @@
 
 # Install dependencies
 sudo apt-get update
-sudo apt-get -y install python3 python3-pip postgresql postgresql-contrib nodejs npm redis nginx
+sudo apt-get -y install python3 python3-pip postgresql postgresql-contrib nodejs npm redis
 sudo npm install -g @vue/cli
 
 cd oa_server

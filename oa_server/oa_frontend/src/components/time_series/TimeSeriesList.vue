@@ -83,7 +83,7 @@ export default {
   methods: {
     removeTimeSeriesTemp (ts) {
       this.axios.delete(
-        'http://'+location.hostname+':8080/api/time_series/'+ts.id+'/'
+        'http://'+location.host+'/api/time_series/'+ts.id+'/'
       ).then(() => {
         // We've removed the time series from the database, so remove it from the store
         this.$store.commit('removeTimeSeriesTemp', ts)
@@ -95,7 +95,7 @@ export default {
     },
     removeTimeSeriesPH (ts) {
       this.axios.delete(
-        'http://'+location.hostname+':8080/api/time_series/'+ts.id+'/'
+         'http://'+location.host+'/api/time_series/'+ts.id+'/'
       ).then(() => {
         // We've removed the time series from the database, so remove it from the store
         this.$store.commit('removeTimeSeriesPH', ts)

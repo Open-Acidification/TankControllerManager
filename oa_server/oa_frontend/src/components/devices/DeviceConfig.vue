@@ -276,7 +276,7 @@ export default {
         return
       }
       this.axios.put(
-        'http://'+location.hostname+':8080/api/devices/'+this.device.mac+'/',
+        'http://'+location.host+'/api/devices/'+this.device.mac+'/',
         {
           mac: this.device.mac,
           name: this.name,
@@ -297,7 +297,7 @@ export default {
       // Hide the dialog
       this.confirmRemoval = false;
       this.axios.delete(
-        'http://'+location.hostname+':8080/api/devices/'+this.device.mac+'/'
+         'http://'+location.host+'/api/devices/'+this.device.mac+'/'
       ).then(() => {
         // We've removed the device from the database, so remove it from the store
         this.$store.commit('removeDevice', this.device)
@@ -319,7 +319,7 @@ export default {
         timeSeriesFormData.set('temp_delay', this.tempTimeSeriesDelay);
 
         this.axios.post(
-          'http://'+location.hostname+':8080/api/devices/'+this.device.mac+'/time_series/',
+           'http://'+location.host+'/api/devices/'+this.device.mac+'/time_series/',
           timeSeriesFormData,
           {headers: {'Content-Type': 'multipart/form-data'}}
         ).then((response) => {

@@ -88,19 +88,19 @@ export default new Vuex.Store({
     },
     updateDevices (context) {
       axios
-        .get('http://'+location.hostname+':8080/api/devices/')
+        .get('http://'+location.host+'/api/devices/')
         .then(response => (context.commit('setDevices', response.data)));
     },
     updateTanks (context) {
       axios
-        .get('http://'+location.hostname+':8080/api/tanks/')
+        .get('http://'+location.host+'/api/tanks/')
         .then(function(response) {
           var tanks = response.data;
           var sparklineRequests = [];
           // Format date and define Sparkline requests
           tanks.forEach(tank => {
             tank.last_update = new Date(tank.last_update + " UTC");
-            sparklineRequests.push(axios.get('http://'+location.hostname+':8080/api/tanks/'+tank.tankid+'/sparklines'))
+            sparklineRequests.push(axios.get('http://'+location.host+'/api/tanks/'+tank.tankid+'/sparklines'))
           });
           axios.all(sparklineRequests).then(axios.spread((...responses) => {
             for (var i = 0; i < tanks.length; i++) {
@@ -111,8 +111,8 @@ export default new Vuex.Store({
         });
     },
     updateTimeSeries (context) {
-      var tempRequest = axios.get('http://'+location.hostname+':8080/api/time_series/temp/');
-      var pHRequest = axios.get('http://'+location.hostname+':8080/api/time_series/pH/');
+      var tempRequest = axios.get('http://'+location.host+'/api/time_series/temp/');
+      var pHRequest = axios.get('http://'+location.host+'/api/time_series/pH/');
       axios.all([tempRequest, pHRequest]).then(axios.spread((...responses) => {
         context.commit('setTimeSeries', {temp: responses[0].data, pH: responses[1].data});
       }));
