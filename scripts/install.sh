@@ -6,6 +6,7 @@ sudo apt-get -y install python3 python3-pip postgresql postgresql-contrib nodejs
 sudo npm install -g @vue/cli
 
 cd oa_server
+ls
 pip3 install -r requirements.txt
 
 # Set up database
