@@ -19,11 +19,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8hotq+@uo29nyoilu5fgf7a5vrlscs6yq1e%y_92tfeb)6@ge4'
+# SECURITY WARNING: keep the secret key used in production secret (with this simple trick)!
+try:
+    # pylint: disable=unused-import
+    from .secret_key import SECRET_KEY
+except ImportError:
+    from django.core.management.utils import get_random_secret_key
+    with Path(__file__).parent.joinpath('secret_key.py').open('w') as secret_file:
+        secret_file.write("SECRET_KEY = '"+get_random_secret_key()+"'")
+    from .secret_key import SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost'
