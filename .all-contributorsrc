@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "3dCameron",
+      "name": "Cameron Bierwagen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28907170?v=4",
+      "profile": "https://www.linkedin.com/in/cameron-bierwagen",
+      "contributions": [
+        "code",
+        "doc",
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "TankControllerManager",
+  "projectOwner": "Open-Acidification",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
