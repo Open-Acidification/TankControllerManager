@@ -4,8 +4,6 @@ import 'package:tank_manager/model/tc_interface.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/shared.dart';
 
-import 'package:tank_manager/view/home_page.dart';
-
 class Keypad extends StatelessWidget {
   const Keypad({
     Key? key,
@@ -64,18 +62,18 @@ class Keypad extends StatelessWidget {
           color: color,
           border: Border.all(width: 5, color: Colors.white),
           borderRadius: const BorderRadius.all(Radius.circular(20))),
-      child: Consumer<UI>(
-        builder: (context, ui, child) {
+      child: Consumer<SHARED>(
+        builder: (context, shared, child) {
           return TextButton(
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(fontSize: 40),
                 primary: Colors.white,
               ),
               onPressed: () {
-                if (ui.currentTank != Tank('', '')) {
+                if (shared.currentTank != Tank('', '')) {
                   tcInterface
-                      .post(ui.currentTank.ip, 'key?value=$label')
-                      .then((value) => ui.display = value);
+                      .post(shared.currentTank.ip, 'key?value=$label')
+                      .then((value) => shared.display = value);
                 }
               },
               child: Text(label));

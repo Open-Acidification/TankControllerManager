@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tank_manager/model/shared.dart';
 import 'package:tank_manager/model/preferences.dart';
 import 'package:tank_manager/model/tank.dart';
-
-import 'package:tank_manager/view/home_page.dart';
+import 'package:tank_manager/model/tc_interface.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -21,10 +20,10 @@ class AppDrawer extends StatelessWidget {
     List<Widget> result = <Widget>[];
     return Drawer(
       backgroundColor: Colors.grey.shade600,
-      child: Consumer<UI>(
-        builder: (context, ui, child) {
+      child: Consumer<SHARED>(
+        builder: (context, shared, child) {
           getObj1(context);
-          for (var each in ui.tanksList) {
+          for (var each in shared.tanksList) {
             result.add(tile(each));
           }
           return ListView(
@@ -40,12 +39,11 @@ class AppDrawer extends StatelessWidget {
                     onPressed: () {
                       var newTank =
                           Tank(nameController.text, ipController.text);
-                      ui.addTank(newTank);
-                      print(ui.tanksList.toString());
-                      saveObj1(ui.tanksList);
-
-                      nameController.text = "";
-                      ipController.text = "";
+                      shared.addTank(newTank);
+                      saveObj1(shared.tanksList);
+                      //shared.text = "12";
+                      //nameController.text = shared.text;
+                      //ipController.text = shared.text;
                     },
                     tooltip: 'Add Tank',
                     child: const Icon(Icons.add),
@@ -83,14 +81,18 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget tile(var selected) {
-    return Consumer<UI>(builder: (context, ui, child) {
+    var tcInterface = TcMockInterface();
+    return Consumer<SHARED>(builder: (context, shared, child) {
       return ListTile(
         title: Text(
           selected.name,
           style: const TextStyle(color: Colors.white),
         ),
         onTap: () {
-          ui.currentTank = selected;
+          shared.currentTank = selected;
+          tcInterface
+              .get(shared.currentTank.ip, 'display')
+              .then((value) => shared.display = value);
 
           Navigator.pop(context);
         },

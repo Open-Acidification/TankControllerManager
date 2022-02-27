@@ -12,28 +12,23 @@ class Information extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Consumer<UI>(
-        builder: (context, ui, child) {
-          return RichText(
-            text: TextSpan(
-              text: ui.fontSize,
-            ),
-          );
-        },
-      ),
-
-      //color: Colors.green,
-      //child: Text(informationJson),
+    return Consumer<SHARED>(
+      builder: (context, ui, child) {
+        return RichText(
+          text: TextSpan(
+            text: ui.display,
+          ),
+        );
+      },
     );
   }
 
   void updateInformation() async {
-    Consumer<UI>(
+    Consumer<SHARED>(
       builder: (context, ui, child) {
         return RichText(
           text: TextSpan(
-            text: ui.fontSize,
+            text: ui.display,
           ),
         );
       },

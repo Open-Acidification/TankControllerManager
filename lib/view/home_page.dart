@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Information(context: context),
       Graphs(context: context),
     ];
-    return Consumer<UI>(
+    return Consumer<SHARED>(
       builder: (context, ui, child) {
         return Scaffold(
           appBar: AppBar(

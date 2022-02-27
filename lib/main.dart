@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => UI())],
+      providers: [ChangeNotifierProvider(create: (_) => SHARED())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Tank Manager',
