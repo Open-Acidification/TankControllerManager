@@ -4,8 +4,14 @@ import 'package:tank_manager/model/tank.dart';
 class SHARED with ChangeNotifier {
   dynamic _currentTank = Tank('', '');
   var _display = '';
+  var _information = '';
   List<Tank> _tanksList = [];
   int _currentIndex = 0;
+
+  set information(information) {
+    _information = information;
+    notifyListeners();
+  }
 
   void addTank(tank) {
     _tanksList.add(tank);
@@ -32,6 +38,7 @@ class SHARED with ChangeNotifier {
     notifyListeners();
   }
 
+  String get information => _information;
   int get currentIndex => _currentIndex;
   List<Tank> get tanksList => _tanksList;
   dynamic get currentTank => _currentTank;

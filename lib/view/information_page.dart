@@ -16,7 +16,7 @@ class Information extends StatelessWidget {
       builder: (context, ui, child) {
         return RichText(
           text: TextSpan(
-            text: ui.display,
+            text: ui.information,
           ),
         );
       },

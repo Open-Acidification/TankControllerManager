@@ -90,6 +90,9 @@ class AppDrawer extends StatelessWidget {
           tcInterface
               .get(shared.currentTank.ip, 'display')
               .then((value) => shared.display = value);
+          tcInterface
+              .get(shared.currentTank.ip, 'current')
+              .then((value) => shared.information = value);
 
           Navigator.pop(context);
         },
