@@ -6,12 +6,6 @@ class SHARED with ChangeNotifier {
   var _display = '';
   List<Tank> _tanksList = [];
   int _currentIndex = 0;
-  String _text = "";
-
-  set text(text) {
-    _text = text;
-    notifyListeners();
-  }
 
   void addTank(tank) {
     _tanksList.add(tank);
@@ -38,7 +32,6 @@ class SHARED with ChangeNotifier {
     notifyListeners();
   }
 
-  String get text => _text;
   int get currentIndex => _currentIndex;
   List<Tank> get tanksList => _tanksList;
   dynamic get currentTank => _currentTank;

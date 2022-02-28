@@ -34,20 +34,17 @@ class AppDrawer extends StatelessWidget {
               field(nameController, 'Name', 'Tank 99'),
               field(ipController, 'IP', '000.000.000.000'),
               Align(
-                  alignment: Alignment.topRight,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      var newTank =
-                          Tank(nameController.text, ipController.text);
-                      shared.addTank(newTank);
-                      saveObj1(shared.tanksList);
-                      //shared.text = "12";
-                      //nameController.text = shared.text;
-                      //ipController.text = shared.text;
-                    },
-                    tooltip: 'Add Tank',
-                    child: const Icon(Icons.add),
-                  ))
+                alignment: Alignment.topRight,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    var newTank = Tank(nameController.text, ipController.text);
+                    shared.addTank(newTank);
+                    saveObj1(shared.tanksList);
+                  },
+                  tooltip: 'Add Tank',
+                  child: const Icon(Icons.add),
+                ),
+              ),
             ],
           );
         },
@@ -81,7 +78,7 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget tile(var selected) {
-    var tcInterface = TcMockInterface();
+    var tcInterface = TcRealInterface();
     return Consumer<SHARED>(builder: (context, shared, child) {
       return ListTile(
         title: Text(

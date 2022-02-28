@@ -15,7 +15,7 @@ class Display extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var tcInterface = TcMockInterface();
+    var tcInterface = TcRealInterface();
     return Consumer<SHARED>(
       builder: (context, shared, child) {
         return InkWell(

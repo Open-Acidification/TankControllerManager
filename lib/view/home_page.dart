@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tank_manager/model/nav_bar.dart';
-import 'package:tank_manager/model/tc_interface.dart';
 import 'package:tank_manager/model/display.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/shared.dart';
@@ -19,8 +18,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var tcInterface = TcMockInterface();
-
   Widget appBody(BuildContext context) {
     return Center(
       child: Column(

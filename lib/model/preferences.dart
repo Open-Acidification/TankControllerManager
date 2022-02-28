@@ -11,6 +11,7 @@ saveObj1(tanksList) async {
 }
 
 getObj1(BuildContext context) async {
+  if (Provider.of<SHARED>(context, listen: false).tanksList.isNotEmpty) return;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.containsKey('obj1')) {
     String obj1 = prefs.getString('obj1')!;
