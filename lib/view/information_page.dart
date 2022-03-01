@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 
 class Information extends StatelessWidget {
   const Information({
@@ -12,23 +12,11 @@ class Information extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SHARED>(
+    return Consumer<AppData>(
       builder: (context, ui, child) {
         return RichText(
           text: TextSpan(
             text: ui.information,
-          ),
-        );
-      },
-    );
-  }
-
-  void updateInformation() async {
-    Consumer<SHARED>(
-      builder: (context, ui, child) {
-        return RichText(
-          text: TextSpan(
-            text: ui.display,
           ),
         );
       },

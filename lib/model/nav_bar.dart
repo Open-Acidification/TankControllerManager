@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 
 class NavBar extends StatelessWidget {
   const NavBar({
@@ -12,7 +12,8 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int currentIndex = Provider.of<SHARED>(context, listen: false).currentIndex;
+    int currentIndex =
+        Provider.of<AppData>(context, listen: false).currentIndex;
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTabTapped,
@@ -37,6 +38,6 @@ class NavBar extends StatelessWidget {
   }
 
   void onTabTapped(int index) {
-    Provider.of<SHARED>(context, listen: false).currentIndex = index;
+    Provider.of<AppData>(context, listen: false).currentIndex = index;
   }
 }

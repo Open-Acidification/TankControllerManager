@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 
@@ -15,17 +15,13 @@ class Display extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var tcInterface = TcRealInterface();
-    return Consumer<SHARED>(
+    var tcInterface = TcInterface.instance;
+    return Consumer<AppData>(
       builder: (context, shared, child) {
         return InkWell(
           splashColor: Colors.grey.shade300,
           onTap: () {
-            if (shared.currentTank != Tank('', '')) {
-              tcInterface
-                  .get(shared.currentTank.ip, 'display')
-                  .then((value) => shared.display = value);
-            }
+            if (shared.currentTank != Tank('', '')) {}
           },
           child: Container(
             margin: const EdgeInsets.only(top: 20, bottom: 20),
@@ -43,7 +39,7 @@ class Display extends StatelessWidget {
             ),
             height: 75.0,
             width: 320,
-            child: Consumer<SHARED>(
+            child: Consumer<AppData>(
               builder: (context, shared, child) {
                 return Text(
                   shared.display,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tank_manager/model/nav_bar.dart';
 import 'package:tank_manager/model/display.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/keypad.dart';
 import 'package:tank_manager/model/app_drawer.dart';
 import 'package:tank_manager/view/information_page.dart';
@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Information(context: context),
       Graphs(context: context),
     ];
-    return Consumer<SHARED>(
+    return Consumer<AppData>(
       builder: (context, ui, child) {
         return Scaffold(
           appBar: AppBar(

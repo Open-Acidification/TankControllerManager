@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:tank_manager/model/tank.dart';
+import 'package:tank_manager/model/tc_interface.dart';
 
-class SHARED with ChangeNotifier {
+class AppData with ChangeNotifier {
   dynamic _currentTank = Tank('', '');
   var _display = '';
   var _information = '';
   List<Tank> _tanksList = [];
   int _currentIndex = 0;
+
+  void updateDisplay() async {
+    var tcInterface = TcInterface.instance;
+    tcInterface.get(currentTank.ip, 'display').then((value) {
+      display = value;
+    });
+  }
 
   set information(information) {
     _information = information;

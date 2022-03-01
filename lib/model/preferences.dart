@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/tank.dart';
 
 saveObj1(tanksList) async {
@@ -11,11 +11,11 @@ saveObj1(tanksList) async {
 }
 
 getObj1(BuildContext context) async {
-  if (Provider.of<SHARED>(context, listen: false).tanksList.isNotEmpty) return;
+  if (Provider.of<AppData>(context, listen: false).tanksList.isNotEmpty) return;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.containsKey('obj1')) {
     String obj1 = prefs.getString('obj1')!;
-    Provider.of<SHARED>(context, listen: false).tanksList =
+    Provider.of<AppData>(context, listen: false).tanksList =
         List<Tank>.from(jsonDecode(obj1).map((obj1) => Tank.fromJson(obj1)));
   }
 }

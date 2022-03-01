@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 
 class Keypad extends StatelessWidget {
   const Keypad({
@@ -55,14 +55,14 @@ class Keypad extends StatelessWidget {
   }
 
   Widget button(BuildContext context, var label, var color) {
-    var tcInterface = TcRealInterface();
+    var tcInterface = TcInterface.instance;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
           color: color,
           border: Border.all(width: 5, color: Colors.white),
           borderRadius: const BorderRadius.all(Radius.circular(20))),
-      child: Consumer<SHARED>(
+      child: Consumer<AppData>(
         builder: (context, shared, child) {
           return TextButton(
               style: TextButton.styleFrom(
@@ -73,7 +73,9 @@ class Keypad extends StatelessWidget {
                 if (shared.currentTank != Tank('', '')) {
                   tcInterface
                       .post(shared.currentTank.ip, 'key?value=$label')
-                      .then((value) => shared.display = value);
+                      .then((value) {
+                    shared.display = value;
+                  });
                 }
               },
               child: Text(label));

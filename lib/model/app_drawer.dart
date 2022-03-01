@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tank_manager/model/shared.dart';
+import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
@@ -20,7 +20,7 @@ class AppDrawer extends StatelessWidget {
     List<Widget> result = <Widget>[];
     return Drawer(
       backgroundColor: Colors.grey.shade600,
-      child: Consumer<SHARED>(
+      child: Consumer<AppData>(
         builder: (context, shared, child) {
           getObj1(context);
           for (var each in shared.tanksList) {
@@ -78,8 +78,8 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget tile(var selected) {
-    var tcInterface = TcRealInterface();
-    return Consumer<SHARED>(builder: (context, shared, child) {
+    var tcInterface = TcInterface.instance;
+    return Consumer<AppData>(builder: (context, shared, child) {
       return ListTile(
         title: Text(
           selected.name,
@@ -87,12 +87,6 @@ class AppDrawer extends StatelessWidget {
         ),
         onTap: () {
           shared.currentTank = selected;
-          tcInterface
-              .get(shared.currentTank.ip, 'display')
-              .then((value) => shared.display = value);
-          tcInterface
-              .get(shared.currentTank.ip, 'current')
-              .then((value) => shared.information = value);
 
           Navigator.pop(context);
         },

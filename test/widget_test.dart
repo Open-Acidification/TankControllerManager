@@ -8,8 +8,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tank_manager/main.dart';
+import 'package:tank_manager/model/tc_interface.dart';
 
 void main() {
+  setUp(() => TcInterface.useMock());
   testWidgets('Buttons work as expected', (WidgetTester tester) async {
     var buttons = [
       '1',
