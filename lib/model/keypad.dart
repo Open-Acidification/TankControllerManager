@@ -70,13 +70,13 @@ class Keypad extends StatelessWidget {
                 primary: Colors.white,
               ),
               onPressed: () {
-                if (shared.currentTank != Tank('', '')) {
-                  tcInterface
-                      .post(shared.currentTank.ip, 'key?value=$label')
-                      .then((value) {
-                    shared.display = value;
-                  });
-                }
+                // if (shared.currentTank != Tank('', '')) {
+                //   tcInterface
+                //       .post(shared.currentTank.ip, 'key?value=$label')
+                //       .then((value) {
+                //     shared.display = value;
+                //   });
+                // }
               },
               child: Text(label));
         },

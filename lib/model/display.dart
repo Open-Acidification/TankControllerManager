@@ -21,7 +21,11 @@ class Display extends StatelessWidget {
         return InkWell(
           splashColor: Colors.grey.shade300,
           onTap: () {
-            if (shared.currentTank != Tank('', '')) {}
+            // if (shared.currentTank != Tank('', '')) {
+            //   tcInterface.get(shared.currentTank.ip, 'display').then((value) {
+            //     String x = value;
+            //   });
+            // }
           },
           child: Container(
             margin: const EdgeInsets.only(top: 20, bottom: 20),
