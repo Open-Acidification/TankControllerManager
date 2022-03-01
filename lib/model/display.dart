@@ -21,6 +21,9 @@ class Display extends StatelessWidget {
         return InkWell(
           splashColor: Colors.grey.shade300,
           onTap: () {
+            tcInterface.get(shared.currentTank.ip, 'display').then((value) {
+              shared.display = value;
+            });
             // if (shared.currentTank != Tank('', '')) {
             //   tcInterface.get(shared.currentTank.ip, 'display').then((value) {
             //     String x = value;
