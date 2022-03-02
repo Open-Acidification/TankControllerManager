@@ -21,9 +21,9 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       backgroundColor: Colors.grey.shade600,
       child: Consumer<AppData>(
-        builder: (context, shared, child) {
+        builder: (context, appData, child) {
           getObj1(context);
-          for (var each in shared.tanksList) {
+          for (var each in appData.tanksList) {
             result.add(tile(each));
           }
           return ListView(
@@ -38,8 +38,8 @@ class AppDrawer extends StatelessWidget {
                 child: FloatingActionButton(
                   onPressed: () {
                     var newTank = Tank(nameController.text, ipController.text);
-                    shared.addTank(newTank);
-                    saveObj1(shared.tanksList);
+                    appData.addTank(newTank);
+                    saveObj1(appData.tanksList);
                   },
                   tooltip: 'Add Tank',
                   child: const Icon(Icons.add),
@@ -79,15 +79,17 @@ class AppDrawer extends StatelessWidget {
 
   Widget tile(var selected) {
     var tcInterface = TcInterface.instance;
-    return Consumer<AppData>(builder: (context, shared, child) {
+    return Consumer<AppData>(builder: (context, appData, child) {
       return ListTile(
         title: Text(
           selected.name,
           style: const TextStyle(color: Colors.white),
         ),
         onTap: () {
-          shared.currentTank = selected;
-
+          appData.currentTank = selected;
+          tcInterface.get(appData.currentTank.ip, 'display').then((value) {
+            appData.display = value;
+          });
           Navigator.pop(context);
         },
       );

@@ -17,13 +17,15 @@ class Display extends StatelessWidget {
   Widget build(BuildContext context) {
     var tcInterface = TcInterface.instance;
     return Consumer<AppData>(
-      builder: (context, shared, child) {
+      builder: (context, appData, child) {
         return InkWell(
           splashColor: Colors.grey.shade300,
           onTap: () {
-            tcInterface.get(shared.currentTank.ip, 'display').then((value) {
-              shared.display = value;
-            });
+            if (appData.currentTank != Tank('', '')) {
+              tcInterface.get(appData.currentTank.ip, 'display').then((value) {
+                appData.display = value;
+              });
+            }
             // if (shared.currentTank != Tank('', '')) {
             //   tcInterface.get(shared.currentTank.ip, 'display').then((value) {
             //     String x = value;
@@ -47,9 +49,9 @@ class Display extends StatelessWidget {
             height: 75.0,
             width: 320,
             child: Consumer<AppData>(
-              builder: (context, shared, child) {
+              builder: (context, appData, child) {
                 return Text(
-                  shared.display,
+                  appData.display,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.vt323(
                     fontSize: 35,

@@ -13,10 +13,10 @@ class Information extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppData>(
-      builder: (context, ui, child) {
+      builder: (context, appData, child) {
         return RichText(
           text: TextSpan(
-            text: ui.information,
+            text: appData.information,
           ),
         );
       },

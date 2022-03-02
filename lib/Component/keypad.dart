@@ -63,20 +63,20 @@ class Keypad extends StatelessWidget {
           border: Border.all(width: 5, color: Colors.white),
           borderRadius: const BorderRadius.all(Radius.circular(20))),
       child: Consumer<AppData>(
-        builder: (context, shared, child) {
+        builder: (context, appData, child) {
           return TextButton(
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(fontSize: 40),
                 primary: Colors.white,
               ),
               onPressed: () {
-                // if (shared.currentTank != Tank('', '')) {
-                //   tcInterface
-                //       .post(shared.currentTank.ip, 'key?value=$label')
-                //       .then((value) {
-                //     shared.display = value;
-                //   });
-                // }
+                if (appData.currentTank != Tank('', '')) {
+                  tcInterface
+                      .post(appData.currentTank.ip, 'key?value=$label')
+                      .then((value) {
+                    appData.display = value;
+                  });
+                }
               },
               child: Text(label));
         },

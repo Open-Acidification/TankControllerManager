@@ -39,15 +39,15 @@ class _MyHomePageState extends State<MyHomePage> {
       Graphs(context: context),
     ];
     return Consumer<AppData>(
-      builder: (context, ui, child) {
+      builder: (context, appData, child) {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.title + ': ' + ui.currentTank.name,
+              widget.title + ': ' + appData.currentTank.name,
             ),
           ),
           drawer: AppDrawer(context: context),
-          body: _children[ui.currentIndex],
+          body: _children[appData.currentIndex],
           bottomNavigationBar: NavBar(context: context),
         );
       },
