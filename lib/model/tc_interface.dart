@@ -1,7 +1,6 @@
 import 'package:http/http.dart' as http;
 
 abstract class TcInterface {
-  //Future<String> send(var value);
   static TcInterface? _instance;
 
   static get instance {

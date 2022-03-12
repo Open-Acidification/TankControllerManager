@@ -8,10 +8,8 @@ import 'package:tank_manager/model/tc_interface.dart';
 class Display extends StatelessWidget {
   const Display({
     Key? key,
-    required this.context,
+    required BuildContext context,
   }) : super(key: key);
-
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +24,6 @@ class Display extends StatelessWidget {
                 appData.display = value;
               });
             }
-            // if (shared.currentTank != Tank('', '')) {
-            //   tcInterface.get(shared.currentTank.ip, 'display').then((value) {
-            //     String x = value;
-            //   });
-            // }
           },
           child: Container(
             margin: const EdgeInsets.only(top: 20, bottom: 20),

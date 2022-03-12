@@ -6,7 +6,7 @@ class AppData with ChangeNotifier {
   dynamic _currentTank = Tank('', '');
   var _display = '';
   var _information = '';
-  List<Tank> _tanksList = [];
+  List<Tank> _tankList = [];
   int _currentIndex = 0;
 
   void updateDisplay() async {
@@ -22,7 +22,7 @@ class AppData with ChangeNotifier {
   }
 
   void addTank(tank) {
-    _tanksList.add(tank);
+    _tankList.add(tank);
     notifyListeners();
   }
 
@@ -32,7 +32,7 @@ class AppData with ChangeNotifier {
   }
 
   set tanksList(tanksList) {
-    _tanksList = tanksList;
+    _tankList = tanksList;
     notifyListeners();
   }
 
@@ -48,7 +48,7 @@ class AppData with ChangeNotifier {
 
   String get information => _information;
   int get currentIndex => _currentIndex;
-  List<Tank> get tanksList => _tanksList;
+  List<Tank> get tanksList => _tankList;
   dynamic get currentTank => _currentTank;
   String get display => _display;
 }

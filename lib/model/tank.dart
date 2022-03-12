@@ -1,6 +1,6 @@
-class Tank<T1, T2> {
-  final T1 name;
-  final T2 ip;
+class Tank {
+  String name;
+  String ip;
 
   Tank(this.name, this.ip);
 
