@@ -23,7 +23,7 @@ class AppDrawer extends StatelessWidget {
       child: Consumer<AppData>(
         builder: (context, appData, child) {
           getObj1(context);
-          for (var each in appData.tanksList) {
+          for (var each in appData.tankList) {
             result.add(tile(each));
           }
           return ListView(
@@ -39,7 +39,7 @@ class AppDrawer extends StatelessWidget {
                   onPressed: () {
                     var newTank = Tank(nameController.text, ipController.text);
                     appData.addTank(newTank);
-                    saveObj1(appData.tanksList);
+                    saveObj1(appData.tankList);
                   },
                   tooltip: 'Add Tank',
                   child: const Icon(Icons.add),
