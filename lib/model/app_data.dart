@@ -31,8 +31,8 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
-  set tanksList(tanksList) {
-    _tankList = tanksList;
+  set tankList(tankList) {
+    _tankList = tankList;
     notifyListeners();
   }
 
@@ -48,7 +48,7 @@ class AppData with ChangeNotifier {
 
   String get information => _information;
   int get currentIndex => _currentIndex;
-  List<Tank> get tanksList => _tankList;
+  List<Tank> get tankList => _tankList;
   dynamic get currentTank => _currentTank;
   String get display => _display;
 }
