@@ -1,10 +1,19 @@
 import 'package:http/http.dart' as http;
 
 abstract class TcInterface {
-  Future<String> send(var value);
+  static TcInterface? _instance;
+
+  static get instance {
+    _instance ??= TcRealInterface();
+    return _instance;
+  }
+
+  static void useMock() {
+    _instance = TcMockInterface();
+  }
 }
 
-class TcMockInterface {
+class TcMockInterface extends TcInterface {
   Future<String> post(var value, String path) async {
     return 'pH=7.352   7.218\nT=10.99 C 11.00' +
         path.substring(path.length - 1);
@@ -18,19 +27,19 @@ class TcMockInterface {
   }
 }
 
-class TcRealInterface {
+class TcRealInterface extends TcInterface {
   Future<String> get(var ip, var path) async {
     var uri = 'http://$ip/api/1/$path';
     final response = await http.get(Uri.parse(uri));
-    final testString = response.body.toString().replaceAll("\r", '');
-    return testString;
+    final subString = response.body.toString().replaceAll("\r", '');
+    return subString;
   }
 
   Future<String> post(var ip, var path) async {
     var uri = 'http://$ip/api/1/$path';
     final response = await http.post(Uri.parse(uri));
-    final testString = response.body.toString().replaceAll("\r", '');
+    final subString = response.body.toString().replaceAll("\r", '');
 
-    return testString;
+    return subString;
   }
 }
