@@ -4,7 +4,7 @@ import 'package:tank_manager/Component/display.dart';
 import 'package:tank_manager/Component/nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
-import 'package:tank_manager/model/keypad.dart';
+import 'package:tank_manager/component/keypad.dart';
 import 'package:tank_manager/view/information_page.dart';
 import 'graphs_page.dart';
 
