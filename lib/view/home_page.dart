@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tank_manager/component/app_drawer.dart';
-import 'package:tank_manager/component/display.dart';
-import 'package:tank_manager/component/nav_bar.dart';
+import 'package:tank_manager/components/app_drawer.dart';
+import 'package:tank_manager/components/display.dart';
+import 'package:tank_manager/components/nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/keypad_widget.dart';
