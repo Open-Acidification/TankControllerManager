@@ -5,6 +5,7 @@ import 'package:tank_manager/Component/nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/component/keypad.dart';
+import 'package:tank_manager/model/tc_interface.dart';
 import 'package:tank_manager/view/information_page.dart';
 import 'graphs_page.dart';
 
@@ -33,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    TcInterface.useMock();
     final List<Widget> _children = [
       appBody(context),
       Information(context: context),
