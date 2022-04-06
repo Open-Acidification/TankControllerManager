@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tank_manager/model/preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 void main() {
   test('Preferences save tank list', () async {
