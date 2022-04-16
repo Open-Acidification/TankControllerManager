@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/tank.dart';
@@ -19,9 +18,17 @@ class AppData with ChangeNotifier {
   List<Tank> _tankList = [];
   int _currentIndex = 0;
 
-  Future<void> readTankList() async {}
+  Future<void> readTankList() async {
+    if (tankList.isNotEmpty) return;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('obj1')) {
+      String obj1 = prefs.getString('obj1')!;
+      tankList =
+          List<Tank>.from(jsonDecode(obj1).map((obj1) => Tank.fromJson(obj1)));
+    }
+  }
 
-  Future<void> writeTankList() async {
+  Future<void> writeTankList(tankList) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('obj1', jsonEncode(tankList));
   }
@@ -41,7 +48,7 @@ class AppData with ChangeNotifier {
   void addTank(tank) {
     _tankList.add(tank);
     notifyListeners();
-    writeTankList();
+    writeTankList(tankList);
   }
 
   set currentIndex(index) {
