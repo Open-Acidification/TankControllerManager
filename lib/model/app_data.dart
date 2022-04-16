@@ -1,13 +1,30 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 
 class AppData with ChangeNotifier {
+  static AppData? _instance;
+
+  static get instance {
+    _instance ??= AppData();
+    return _instance;
+  }
+
   dynamic _currentTank = Tank('', '');
   var _display = '';
   var _information = '';
   List<Tank> _tankList = [];
   int _currentIndex = 0;
+
+  Future<void> readTankList() async {}
+
+  Future<void> writeTankList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('obj1', jsonEncode(tankList));
+  }
 
   void updateDisplay() async {
     var tcInterface = TcInterface.instance;
@@ -24,6 +41,7 @@ class AppData with ChangeNotifier {
   void addTank(tank) {
     _tankList.add(tank);
     notifyListeners();
+    writeTankList();
   }
 
   set currentIndex(index) {
