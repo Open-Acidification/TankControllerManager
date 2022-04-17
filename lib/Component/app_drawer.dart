@@ -73,21 +73,20 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget tile(var selected) {
+    var appData = AppData.instance;
     var tcInterface = TcInterface.instance;
-    return Consumer<AppData>(builder: (context, appData, child) {
-      return ListTile(
-        title: Text(
-          selected.name,
-          style: const TextStyle(color: Colors.white),
-        ),
-        onTap: () {
-          appData.currentTank = selected;
-          tcInterface.get(appData.currentTank.ip, 'display').then((value) {
-            appData.display = value;
-          });
-          Navigator.pop(context);
-        },
-      );
-    });
+    return ListTile(
+      title: Text(
+        selected.name,
+        style: const TextStyle(color: Colors.white),
+      ),
+      onTap: () {
+        appData.currentTank = selected;
+        tcInterface.get(appData.currentTank.ip, 'display').then((value) {
+          appData.display = value;
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 }
