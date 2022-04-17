@@ -12,8 +12,8 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int currentIndex =
-        Provider.of<AppData>(context, listen: false).currentIndex;
+    var appData = AppData.instance;
+    int currentIndex = appData.currentIndex;
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTabTapped,
@@ -38,6 +38,7 @@ class NavBar extends StatelessWidget {
   }
 
   void onTabTapped(int index) {
-    Provider.of<AppData>(context, listen: false).currentIndex = index;
+    var appData = AppData.instance;
+    appData.currentIndex = index;
   }
 }
