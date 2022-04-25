@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/app_data.dart';
@@ -22,21 +24,20 @@ void main() {
     expect(appData.currentTank, Tank('Tank', '192.168.0.1'));
   });
 
-  group(
-    "Write/Read",
-    () {
-      test('App write tank list', () async {
-        List<Tank> tankList = [Tank('Tank', '192.168.0.1')];
-        appData.writeTankList(tankList);
+  test('App write tank list', () async {
+    List<Tank> tankList = [Tank('Tank', '192.168.0.1')];
+    appData.writeTankList(tankList);
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        expect(prefs.getString('obj1'), '[{"name":"Tank","ip":"192.168.0.1"}]');
-      });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('obj1'), '[{"name":"Tank","ip":"192.168.0.1"}]');
+  });
 
-      test('App read tank list', () async {
-        await appData.readTankList();
-        expect(appData.tankList, [Tank('Tank', '192.168.0.1')]);
-      });
-    },
-  );
+  test('App read tank list', () async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<Tank> tankList = [Tank('Tank', '192.168.0.1')];
+    prefs.setString('obj1', jsonEncode(tankList));
+
+    await appData.readTankList();
+    expect(appData.tankList, [Tank('Tank', '192.168.0.1')]);
+  });
 }
