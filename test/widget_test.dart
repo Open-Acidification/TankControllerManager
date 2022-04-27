@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tank_manager/main.dart';
+import 'package:tank_manager/model/app_data.dart';
+import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 
 void main() {
@@ -25,6 +27,10 @@ void main() {
       '#',
       'D'
     ];
+
+    // create a tank
+    var appData = AppData.instance;
+    appData.currentTank = Tank("test_tank", "192.168.0.1");
 
     // Force button visiblity for tester
     // Verify a buttons exists
