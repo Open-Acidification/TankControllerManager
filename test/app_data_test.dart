@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/tank.dart';
 
-void main() {
+void main() async {
   var appData = AppData.instance;
   test('App current index', () {
     expect(appData.currentIndex, 0);
