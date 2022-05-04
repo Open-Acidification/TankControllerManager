@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
-import 'package:tank_manager/model/preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 
@@ -15,39 +13,35 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var appData = AppData.instance;
     final ipController = TextEditingController();
     final nameController = TextEditingController();
-    List<Widget> result = <Widget>[];
+    List<Widget> tiles = <Widget>[];
+    appData.readTankList();
+    for (var tank in appData.tankList) {
+      tiles.add(tile(tank));
+    }
     return Drawer(
       backgroundColor: Colors.grey.shade600,
-      child: Consumer<AppData>(
-        builder: (context, appData, child) {
-          getObj1(context);
-          for (var each in appData.tankList) {
-            result.add(tile(each));
-          }
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              drawerHeader(context),
-              ...result,
-              field(nameController, 'Name', 'Tank 99'),
-              field(ipController, 'IP', '000.000.000.000'),
-              Align(
-                alignment: Alignment.topRight,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    var newTank = Tank(nameController.text, ipController.text);
-                    appData.addTank(newTank);
-                    saveObj1(appData.tankList);
-                  },
-                  tooltip: 'Add Tank',
-                  child: const Icon(Icons.add),
-                ),
-              ),
-            ],
-          );
-        },
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          drawerHeader(context),
+          ...tiles,
+          field(nameController, 'Name', 'Tank 99'),
+          field(ipController, 'IP', '000.000.000.000'),
+          Align(
+            alignment: Alignment.topRight,
+            child: FloatingActionButton(
+              onPressed: () {
+                var newTank = Tank(nameController.text, ipController.text);
+                appData.addTank(newTank);
+              },
+              tooltip: 'Add Tank',
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -78,21 +72,20 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget tile(var selected) {
+    var appData = AppData.instance;
     var tcInterface = TcInterface.instance;
-    return Consumer<AppData>(builder: (context, appData, child) {
-      return ListTile(
-        title: Text(
-          selected.name,
-          style: const TextStyle(color: Colors.white),
-        ),
-        onTap: () {
-          appData.currentTank = selected;
-          tcInterface.get(appData.currentTank.ip, 'display').then((value) {
-            appData.display = value;
-          });
-          Navigator.pop(context);
-        },
-      );
-    });
+    return ListTile(
+      title: Text(
+        selected.name,
+        style: const TextStyle(color: Colors.white),
+      ),
+      onTap: () {
+        appData.currentTank = selected;
+        tcInterface.get(appData.currentTank.ip, 'display').then((value) {
+          appData.display = value;
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 }

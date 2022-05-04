@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
-import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
 
 class Keypad extends StatelessWidget {
@@ -55,6 +54,7 @@ class Keypad extends StatelessWidget {
   }
 
   Widget button(BuildContext context, var label, var color) {
+    var appData = AppData.instance;
     var tcInterface = TcInterface.instance;
     return Container(
       padding: const EdgeInsets.all(8),
@@ -62,25 +62,21 @@ class Keypad extends StatelessWidget {
           color: color,
           border: Border.all(width: 5, color: Colors.white),
           borderRadius: const BorderRadius.all(Radius.circular(20))),
-      child: Consumer<AppData>(
-        builder: (context, appData, child) {
-          return TextButton(
-              style: TextButton.styleFrom(
-                textStyle: const TextStyle(fontSize: 40),
-                primary: Colors.white,
-              ),
-              onPressed: () {
-                if (appData.currentTank != Tank('', '')) {
-                  tcInterface
-                      .post(appData.currentTank.ip, 'key?value=$label')
-                      .then((value) {
-                    appData.display = value;
-                  });
-                }
-              },
-              child: Text(label));
-        },
-      ),
+      child: TextButton(
+          style: TextButton.styleFrom(
+            textStyle: const TextStyle(fontSize: 40),
+            primary: Colors.white,
+          ),
+          onPressed: () {
+            if (appData.currentTank != Tank('', '')) {
+              tcInterface
+                  .post(appData.currentTank.ip, 'key?value=$label')
+                  .then((value) {
+                appData.display = value;
+              });
+            }
+          },
+          child: Text(label)),
     );
   }
 }

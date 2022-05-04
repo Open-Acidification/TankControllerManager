@@ -41,18 +41,14 @@ class Display extends StatelessWidget {
             ),
             height: 75.0,
             width: 320,
-            child: Consumer<AppData>(
-              builder: (context, appData, child) {
-                return Text(
-                  appData.display,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.vt323(
-                    fontSize: 35,
-                    color: Colors.white,
-                    letterSpacing: 3,
-                  ),
-                );
-              },
+            child: Text(
+              appData.display,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.vt323(
+                fontSize: 35,
+                color: Colors.white,
+                letterSpacing: 3,
+              ),
             ),
           ),
         );
