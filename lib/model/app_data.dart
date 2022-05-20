@@ -20,6 +20,7 @@ class AppData with ChangeNotifier {
 
   Future<void> readTankList() async {
     if (tankList.isNotEmpty) return;
+    WidgetsFlutterBinding.ensureInitialized();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('obj1')) {
       String obj1 = prefs.getString('obj1')!;
