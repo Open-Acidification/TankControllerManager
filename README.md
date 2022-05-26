@@ -6,7 +6,9 @@ Software for the Open Acidification central web server which interfaces with the
 
 
 ## Deployment:
-TBD
+
+The web application is built automatically on each commit to main and can be viewed [here](https://open-acidification.github.io/TankControllerManager/).
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
