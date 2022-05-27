@@ -11,11 +11,29 @@ flutter build web
 ```
 2. Navigate to TankControllerManager/build/web and run
 ```python
-flutter build web
+python -m http.server 8000
 ```
 
 ### Android
-1. 
+
+#### Signed Appbundle
+https://docs.flutter.dev/deployment/android
+1. Open a terminal and run
+```
+keytool -genkey -v -keystore c:\key.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 1000 -alias upload
+```
+
+2. Create a file named TankControllerManager/android/key.properties and in it
+```
+storePassword=<password from step one>
+keyPassword=<password from step one>
+keyAlias=<alias from step one>
+storeFile=<location of output from step one, may require double backslashes '\\' in file path, c:\\key.jks>
+```
+3. Run
+```
+flutter build appbundle
+```
 
 
 ## Contributors ✨
