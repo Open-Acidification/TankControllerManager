@@ -1,13 +1,22 @@
-# Open Acidification Server
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-Software for the Open Acidification central web server which interfaces with the individual pH-Stat units.
+# Tank Controller Manager
+The Tank Controller Manager (TCM) works to monitor, operate, and consolidate multiple tank controllers. A tank controller regulates tank pH through CO2 addition and temperature. The purpose of the TCM is to allow over-the-network access to tank controllers while facilitating research by reporting data. Created in Flutter with the programming language Dart, the TCM runs on virtually every main platform.
 
 
-## Deployment:
-
+## Deployment
 The web application is built automatically on each commit to main and can be viewed [here](https://open-acidification.github.io/TankControllerManager/).
+### Web
+1. Open a terminal and run
+```
+flutter build web
+```
+2. Navigate to TankControllerManager/build/web and run
+```python
+flutter build web
+```
+
+### Android
+1. 
+
 
 ## Contributors ✨
 
