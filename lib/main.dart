@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tank_manager/model/tc_interface.dart';
 import 'package:tank_manager/view/home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
@@ -14,7 +13,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TcInterface.useMock();
     return ChangeNotifierProvider<AppData>.value(
       value: AppData.instance,
       child: MaterialApp(
