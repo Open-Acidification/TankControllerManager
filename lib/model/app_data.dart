@@ -50,7 +50,12 @@ class AppData with ChangeNotifier {
     notifyListeners();
     writeTankList(tankList);
   }
-
+  
+  void removeTank(tankIp) {
+    _tanksList.removeWhere((tank) => tank.ip == tankIp);
+    notifyListeners();
+    writeTankList(tankList);
+  }
   set currentIndex(index) {
     _currentIndex = index;
     notifyListeners();
