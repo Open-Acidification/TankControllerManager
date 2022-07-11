@@ -6,6 +6,8 @@ import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/tank.dart';
 
 void main() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
   var appData = AppData.instance;
   test('App current index', () {
     expect(appData.currentIndex, 0);
