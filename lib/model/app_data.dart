@@ -14,7 +14,7 @@ class AppData with ChangeNotifier {
 
   dynamic _currentTank = Tank('', '');
   var _display = '';
-  var _information = '';
+  var _information = <String, dynamic>{};
   List<Tank> _tankList = [];
   int _currentIndex = 0;
 
@@ -33,15 +33,17 @@ class AppData with ChangeNotifier {
     prefs.setString('obj1', jsonEncode(tankList));
   }
 
-  void updateDisplay() async {
+  Future<void> updateDisplay() async {
     var tcInterface = TcInterface.instance;
     tcInterface.get(currentTank.ip, 'display').then((value) {
       display = value;
     });
   }
 
-  set information(information) {
-    _information = information;
+  Future<void> updateInformation() async {
+    var tcInterface = TcInterface.instance;
+    var value = await tcInterface.get(currentTank.ip, 'current');
+    _information = jsonDecode(value);
     notifyListeners();
   }
 
@@ -71,7 +73,7 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
-  String get information => _information;
+  Map<String, dynamic> get information => _information;
   int get currentIndex => _currentIndex;
   List<Tank> get tankList => _tankList;
   dynamic get currentTank => _currentTank;
