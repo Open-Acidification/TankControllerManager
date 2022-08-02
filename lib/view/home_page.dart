@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _children = [
+    final List<Widget> children = [
       appBody(context),
       Information(context: context),
       Graphs(context: context),
@@ -43,11 +43,11 @@ class _MyHomePageState extends State<MyHomePage> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.title + ': ' + appData.currentTank.name,
+              '${widget.title}: ${appData.currentTank.name}',
             ),
           ),
           drawer: AppDrawer(context: context),
-          body: _children[appData.currentIndex],
+          body: children[appData.currentIndex],
           bottomNavigationBar: NavBar(context: context),
         );
       },
