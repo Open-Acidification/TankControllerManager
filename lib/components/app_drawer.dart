@@ -48,12 +48,12 @@ class AppDrawer extends StatelessWidget {
 
   Widget drawerHeader(BuildContext context) {
     return Container(
+      color: Colors.blue,
       child: DrawerHeader(
         child: Image.asset(
           'lib/assets/oap.png',
         ),
       ),
-      color: Colors.blue,
     );
   }
 
