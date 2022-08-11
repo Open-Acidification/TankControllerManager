@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
-import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 class Files extends StatelessWidget {
   const Files({
@@ -27,45 +27,45 @@ class Files extends StatelessWidget {
                   DataCell(Text(fileName.toString())),
                   DataCell(Container(
                       alignment: const Alignment(1.0, 0.0),
-                      child: Text(fileSize.toString()))),
-                  DataCell(Container(
-                    alignment: const Alignment(1.0, 0.0),
-                    child: IconButton(
-                      icon: const Icon(Icons.download),
-                      onPressed: () async {
-                        // Map<Permission, PermissionStatus> statuses = await [
-                        //   Permission.storage,
-                        //   //add more permission to request here.
-                        // ].request();
-                        // if (statuses[Permission.storage]!.isGranted) {
-                        //   var directory =
-                        //       await DownloadsPathProvider.downloadsDirectory;
-                        //   if (directory != null) {
-                        //     String savePath =
-                        //         directory.path + fileName.toString();
-                        //     print(savePath);
+                      child: Text(fileSize.toString().trim()))),
+                  // DataCell(Container(
+                  //   alignment: const Alignment(1.0, 0.0),
+                  //   child: IconButton(
+                  //     icon: const Icon(Icons.download),
+                  //     onPressed: () async {
+                  //       // Map<Permission, PermissionStatus> statuses = await [
+                  //       //   Permission.storage,
+                  //       //   //add more permission to request here.
+                  //       // ].request();
+                  //       // if (statuses[Permission.storage]!.isGranted) {
+                  //       //   var directory =
+                  //       //       await DownloadsPathProvider.downloadsDirectory;
+                  //       //   if (directory != null) {
+                  //       //     String savePath =
+                  //       //         directory.path + fileName.toString();
+                  //       //     print(savePath);
 
-                        //     try {
-                        //       await Dio().download("http://", savePath,
-                        //           onReceiveProgress: (received, total) {
-                        //         if (total != -1) {
-                        //           print((received / total * 100)
-                        //                   .toStringAsFixed(0) +
-                        //               "%");
-                        //           // Build progressbar feature here
-                        //         }
-                        //       });
-                        //       print("File is saved to download folder.");
-                        //     } on DioError catch (e) {
-                        //       print(e.message);
-                        //     }
-                        //   }
-                        // } else {
-                        //   print("No permission t read and write.");
-                        // }
-                      },
-                    ),
-                  )),
+                  //       //     try {
+                  //       //       await Dio().download("http://", savePath,
+                  //       //           onReceiveProgress: (received, total) {
+                  //       //         if (total != -1) {
+                  //       //           print((received / total * 100)
+                  //       //                   .toStringAsFixed(0) +
+                  //       //               "%");
+                  //       //           // Build progressbar feature here
+                  //       //         }
+                  //       //       });
+                  //       //       print("File is saved to download folder.");
+                  //       //     } on DioError catch (e) {
+                  //       //       print(e.message);
+                  //       //     }
+                  //       //   }
+                  //       // } else {
+                  //       //   print("No permission t read and write.");
+                  //       // }
+                  //     },
+                  //   ),
+                  // )),
                 ],
               ),
             ),
@@ -76,7 +76,7 @@ class Files extends StatelessWidget {
               columns: const <DataColumn>[
                 DataColumn(label: Text('File Name')),
                 DataColumn(label: Text('File Size')),
-                DataColumn(label: Text('')),
+                // DataColumn(label: Text('')),
               ],
               rows: fileRows,
             )
