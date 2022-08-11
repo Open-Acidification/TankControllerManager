@@ -19,9 +19,13 @@ class NavBar extends StatelessWidget {
       label: 'Information',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.bar_chart_rounded),
-      label: 'Graphs',
+      icon: Icon(Icons.folder),
+      label: 'Files',
     ),
+    // BottomNavigationBarItem(
+    //   icon: Icon(Icons.bar_chart_rounded),
+    //   label: 'Graphs',
+    // ),
   ];
 
   @override
@@ -43,6 +47,9 @@ class NavBar extends StatelessWidget {
     appData.currentIndex = index;
     if (items[index].label == 'Information') {
       appData.updateInformation();
+    }
+    if (items[index].label == 'Files') {
+      appData.updateFiles();
     }
   }
 }

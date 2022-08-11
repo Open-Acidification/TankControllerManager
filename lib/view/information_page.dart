@@ -12,34 +12,37 @@ class Information extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppData>(
-      builder: (context, appData, child) {
-        var informationRows = <DataRow>[];
-        appData.information.forEach(
-          (key, value) => informationRows.add(
-            DataRow(
-              cells: <DataCell>[
-                DataCell(Text(key.toString())),
-                DataCell(Text(value.toString()))
-              ],
+    return Container(
+      color: Colors.white,
+      child: Consumer<AppData>(
+        builder: (context, appData, child) {
+          var informationRows = <DataRow>[];
+          appData.information.forEach(
+            (key, value) => informationRows.add(
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text(key.toString())),
+                  DataCell(Text(value.toString()))
+                ],
+              ),
             ),
-          ),
-        );
-        return ListView(children: <Widget>[
-          DataTable(
-            headingRowHeight: 0,
-            columns: const <DataColumn>[
-              DataColumn(
-                label: Text('Key'),
-              ),
-              DataColumn(
-                label: Text('Value'),
-              ),
-            ],
-            rows: informationRows,
-          )
-        ]);
-      },
+          );
+          return ListView(children: <Widget>[
+            DataTable(
+              headingRowHeight: 0,
+              columns: const <DataColumn>[
+                DataColumn(
+                  label: Text('Key'),
+                ),
+                DataColumn(
+                  label: Text('Value'),
+                ),
+              ],
+              rows: informationRows,
+            )
+          ]);
+        },
+      ),
     );
   }
 }
