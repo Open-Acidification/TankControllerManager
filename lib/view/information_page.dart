@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
-import 'package:tank_manager/model/tc_interface.dart';
 
 class Information extends StatelessWidget {
   const Information({
