@@ -20,11 +20,31 @@ class Information extends StatelessWidget {
     });
     return Consumer<AppData>(
       builder: (context, appData, child) {
-        return RichText(
-          text: TextSpan(
-            text: appData.information,
+        var informationRows = <DataRow>[];
+        appData.information.forEach(
+          (key, value) => informationRows.add(
+            DataRow(
+              cells: <DataCell>[
+                DataCell(Text(key.toString())),
+                DataCell(Text(value.toString()))
+              ],
+            ),
           ),
         );
+        return ListView(children: <Widget>[
+          DataTable(
+            headingRowHeight: 0,
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Key'),
+              ),
+              DataColumn(
+                label: Text('Value'),
+              ),
+            ],
+            rows: informationRows,
+          )
+        ]);
       },
     );
   }

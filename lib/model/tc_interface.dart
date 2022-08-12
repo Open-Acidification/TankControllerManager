@@ -15,15 +15,14 @@ abstract class TcInterface {
 
 class TcMockInterface extends TcInterface {
   Future<String> post(var value, String path) async {
-    return 'pH=7.352   7.218\nT=10.99 C 11.00' +
-        path.substring(path.length - 1);
+    return 'pH=7.352   7.218\nT=10.99 C 11.00${path.substring(path.length - 1)}';
   }
 
   Future<String> get(var value, var path) async {
     if (path == 'current') {
-      return "IPAddress:172.27.5.173, MAC:90:A2:DA:FD:C2:38, FreeMemory:3519 bytes, GoogleSheetInterval:20, LogFile:, PHSlope:, Kp:-31072.0, Ki:0.0, Kd:0.0, PID:ON, TankID:99, Uptime:4d 5h 15m 58s, Version:21.09.1";
+      return '{"IPAddress":"172.27.5.150","MAC":"90:A2:DA:0F:45:C0","FreeMemory":"3791 bytes","GoogleSheetInterval":10,"LogFile":"20220722.csv","PHSlope":"","Kp":9000.4,"Ki":0.0,"Kd":0.0,"PID":"ON","TankID":3,"Uptime":"0d 0h 1m 7s","Version":"22.04.1"}';
     }
-    return 'pH=7.352   7.218\nT=10.99 C 11.00' + path;
+    return 'pH=7.352   7.218\nT=10.99 C 11.00$path';
   }
 }
 
