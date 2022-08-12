@@ -23,8 +23,9 @@ class Files extends StatelessWidget {
                 cells: <DataCell>[
                   DataCell(Text(fileName.toString())),
                   DataCell(Container(
-                      alignment: const Alignment(1.0, 0.0),
-                      child: Text(fileSize.toString().trim()))),
+                    alignment: const Alignment(1.0, 0.0),
+                    child: Text(fileSize.toString().trim()),
+                  )),
                 ],
               ),
             ),
