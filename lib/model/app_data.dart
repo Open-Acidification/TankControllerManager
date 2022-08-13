@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
+import 'dart:async';
 
 class AppData with ChangeNotifier {
   static AppData? _instance;
@@ -14,7 +15,8 @@ class AppData with ChangeNotifier {
 
   dynamic _currentTank = Tank('', '');
   var _display = '';
-  var _information = <String, dynamic>{};
+  Map<String, dynamic> _information = <String, dynamic>{};
+  Map<String, dynamic> _files = <String, dynamic>{};
   List<Tank> _tankList = [];
   int _currentIndex = 0;
 
@@ -48,6 +50,19 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateFiles() async {
+    var tcInterface = TcInterface.instance;
+    var value = await tcInterface.get(currentTank.ip, 'rootdir');
+    while (value.substring(value.length - 1) == "\n") {
+      value = value.substring(0, value.length - 1);
+    }
+    value = value.replaceAll("\n", '", "');
+    value = value.replaceAll("\t", '":"');
+    value = '{"$value"}';
+    _files = jsonDecode(value);
+    notifyListeners();
+  }
+
   void addTank(tank) {
     _tankList.add(tank);
     notifyListeners();
@@ -75,6 +90,7 @@ class AppData with ChangeNotifier {
   }
 
   Map<String, dynamic> get information => _information;
+  Map<String, dynamic> get files => _files;
   int get currentIndex => _currentIndex;
   List<Tank> get tankList => _tankList;
   dynamic get currentTank => _currentTank;

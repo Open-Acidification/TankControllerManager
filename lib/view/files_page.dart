@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
 
-class Information extends StatelessWidget {
-  const Information({
+class Files extends StatelessWidget {
+  const Files({
     Key? key,
     required this.context,
   }) : super(key: key);
@@ -16,13 +16,16 @@ class Information extends StatelessWidget {
       color: Colors.white,
       child: Consumer<AppData>(
         builder: (context, appData, child) {
-          var informationRows = <DataRow>[];
-          appData.information.forEach(
-            (key, value) => informationRows.add(
+          var fileRows = <DataRow>[];
+          appData.files.forEach(
+            (fileName, fileSize) => fileRows.add(
               DataRow(
                 cells: <DataCell>[
-                  DataCell(Text(key.toString())),
-                  DataCell(Text(value.toString()))
+                  DataCell(Text(fileName.toString())),
+                  DataCell(Container(
+                    alignment: const Alignment(1.0, 0.0),
+                    child: Text(fileSize.toString().trim()),
+                  )),
                 ],
               ),
             ),
@@ -31,14 +34,10 @@ class Information extends StatelessWidget {
             DataTable(
               headingRowHeight: 0,
               columns: const <DataColumn>[
-                DataColumn(
-                  label: Text('Key'),
-                ),
-                DataColumn(
-                  label: Text('Value'),
-                ),
+                DataColumn(label: Text('File Name')),
+                DataColumn(label: Text('File Size')),
               ],
-              rows: informationRows,
+              rows: fileRows,
             )
           ]);
         },

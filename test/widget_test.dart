@@ -48,7 +48,7 @@ void main() {
     }
   });
 
-  testWidgets('Information displays as expected', (WidgetTester tester) async {
+  testWidgets('Information is displayed', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
@@ -67,5 +67,28 @@ void main() {
     await tester.pump();
     expect(find.text("90:A2:DA:0F:45:C0"), findsOneWidget);
     expect(find.text("FreeMemory"), findsOneWidget);
+  });
+
+  testWidgets('Files are displayed', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Create a tank
+    var appData = AppData.instance;
+    appData.currentTank = Tank("test_tank", "192.168.0.1");
+
+    // Verify files are not displayed
+    // Navigate to Files
+    // Verify files are displayed
+    await tester.ensureVisible(find.text("Files"));
+    expect(find.text("Files"), findsOneWidget);
+    expect(find.text("20220217.csv"), findsNothing);
+    expect(find.text("20220809.log"), findsNothing);
+    expect(find.text("8005 KB"), findsNothing);
+    await tester.tap(find.text("Files"));
+    await tester.pump();
+    expect(find.text("20220217.csv"), findsOneWidget);
+    expect(find.text("20220809.log"), findsOneWidget);
+    expect(find.text("8005 KB"), findsWidgets);
   });
 }

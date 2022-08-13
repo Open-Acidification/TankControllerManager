@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/components/keypad.dart';
 import 'package:tank_manager/view/information_page.dart';
-import 'graphs_page.dart';
+import 'package:tank_manager/view/files_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Widget> children = [
       appBody(context),
       Information(context: context),
-      Graphs(context: context),
+      Files(context: context),
     ];
     return Consumer<AppData>(
       builder: (context, appData, child) {
