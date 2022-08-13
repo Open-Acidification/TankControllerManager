@@ -2,8 +2,7 @@
     package="com.example.tank_manager">
    <application
         android:label="tank_manager"
-        android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
