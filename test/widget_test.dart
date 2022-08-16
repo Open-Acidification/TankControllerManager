@@ -91,4 +91,35 @@ void main() {
     expect(find.text("20220809.log"), findsOneWidget);
     expect(find.text("8005 KB"), findsWidgets);
   });
+
+  testWidgets('No tank selected', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Don't create a tank
+
+    // Verify error message is not displayed
+    // Navigate to Information
+    // Verify error message is displayed
+    await tester.ensureVisible(find.text("Information"));
+    expect(find.text("Information"), findsOneWidget);
+    expect(find.text("Error: Choose tank from menu"), findsNothing);
+    await tester.tap(find.text("Information"));
+    await tester.pump();
+    expect(find.text("Error: Choose tank from menu"), findsOneWidget);
+
+    // Navigate back to Keypad
+    // Verify error message is not displayed
+    // Navigate to Files
+    // Verify error message is displayed
+    await tester.ensureVisible(find.text("Keypad"));
+    await tester.tap(find.text("Keypad"));
+    await tester.pump();
+    await tester.ensureVisible(find.text("Files"));
+    expect(find.text("Files"), findsOneWidget);
+    expect(find.text("Error: Choose tank from menu"), findsNothing);
+    await tester.tap(find.text("Files"));
+    await tester.pump();
+    expect(find.text("Error: Choose tank from menu"), findsOneWidget);
+  });
 }

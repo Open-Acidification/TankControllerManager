@@ -46,16 +46,20 @@ class AppData with ChangeNotifier {
   }
 
   Future<void> refreshInformation() async {
-    if (currentTank != Tank('', '')) {
+    if (currentTank == Tank('', '')) {
+      _information = jsonDecode("{\"Error: Choose tank from menu\":\"\"}");
+    } else {
       var tcInterface = TcInterface.instance;
       var value = await tcInterface.get(currentTank.ip, 'current');
       _information = jsonDecode(value);
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   Future<void> refreshFiles() async {
-    if (currentTank != Tank('', '')) {
+    if (currentTank == Tank('', '')) {
+      _files = jsonDecode("{\"Error: Choose tank from menu\":\"\"}");
+    } else {
       var tcInterface = TcInterface.instance;
       var value = await tcInterface.get(currentTank.ip, 'rootdir');
       while (value.substring(value.length - 1) == "\n") {
@@ -65,8 +69,8 @@ class AppData with ChangeNotifier {
       value = value.replaceAll("\t", '":"');
       value = '{"$value"}';
       _files = jsonDecode(value);
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   void addTank(tank) {
