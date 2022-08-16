@@ -45,11 +45,14 @@ class NavBar extends StatelessWidget {
   void onTabTapped(int index) {
     var appData = AppData.instance;
     appData.currentIndex = index;
+    if (items[index].label == 'Keypad') {
+      appData.refreshDisplay();
+    }
     if (items[index].label == 'Information') {
-      appData.updateInformation();
+      appData.refreshInformation();
     }
     if (items[index].label == 'Files') {
-      appData.updateFiles();
+      appData.refreshFiles();
     }
   }
 }
