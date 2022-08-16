@@ -16,7 +16,7 @@ class Files extends StatelessWidget {
       color: Colors.white,
       child: Consumer<AppData>(
         builder: (context, appData, child) {
-          var fileRows = <DataRow>[];
+          List<DataRow> fileRows = <DataRow>[];
           appData.files.forEach(
             (fileName, fileSize) => fileRows.add(
               DataRow(
@@ -29,6 +29,11 @@ class Files extends StatelessWidget {
                 ],
               ),
             ),
+          );
+          fileRows.sort(
+            (a, b) => a.cells[0].child
+                .toString()
+                .compareTo(b.cells[0].child.toString()),
           );
           return ListView(children: <Widget>[
             DataTable(
