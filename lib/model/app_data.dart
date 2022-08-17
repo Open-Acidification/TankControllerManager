@@ -36,30 +36,40 @@ class AppData with ChangeNotifier {
     prefs.setString('obj1', jsonEncode(tankList));
   }
 
-  Future<void> updateDisplay() async {
-    var tcInterface = TcInterface.instance;
-    tcInterface.get(currentTank.ip, 'display').then((value) {
-      display = value;
-    });
+  Future<void> refreshDisplay() async {
+    if (currentTank != Tank('', '')) {
+      var tcInterface = TcInterface.instance;
+      tcInterface.get(currentTank.ip, 'display').then((value) {
+        display = value;
+      });
+    }
   }
 
-  Future<void> updateInformation() async {
-    var tcInterface = TcInterface.instance;
-    var value = await tcInterface.get(currentTank.ip, 'current');
-    _information = jsonDecode(value);
+  Future<void> refreshInformation() async {
+    if (currentTank == Tank('', '')) {
+      _information = jsonDecode("{\"Error: Choose tank from menu\":\"\"}");
+    } else {
+      var tcInterface = TcInterface.instance;
+      var value = await tcInterface.get(currentTank.ip, 'current');
+      _information = jsonDecode(value);
+    }
     notifyListeners();
   }
 
-  Future<void> updateFiles() async {
-    var tcInterface = TcInterface.instance;
-    var value = await tcInterface.get(currentTank.ip, 'rootdir');
-    while (value.substring(value.length - 1) == "\n") {
-      value = value.substring(0, value.length - 1);
+  Future<void> refreshFiles() async {
+    if (currentTank == Tank('', '')) {
+      _files = jsonDecode("{\"Error: Choose tank from menu\":\"\"}");
+    } else {
+      var tcInterface = TcInterface.instance;
+      var value = await tcInterface.get(currentTank.ip, 'rootdir');
+      while (value.substring(value.length - 1) == "\n") {
+        value = value.substring(0, value.length - 1);
+      }
+      value = value.replaceAll("\n", '", "');
+      value = value.replaceAll("\t", '":"');
+      value = '{"$value"}';
+      _files = jsonDecode(value);
     }
-    value = value.replaceAll("\n", '", "');
-    value = value.replaceAll("\t", '":"');
-    value = '{"$value"}';
-    _files = jsonDecode(value);
     notifyListeners();
   }
 

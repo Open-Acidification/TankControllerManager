@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tank_manager/model/app_data.dart';
-import 'package:tank_manager/model/tank.dart';
-import 'package:tank_manager/model/tc_interface.dart';
 
 class Display extends StatelessWidget {
   const Display({
@@ -13,17 +11,12 @@ class Display extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var tcInterface = TcInterface.instance;
     return Consumer<AppData>(
       builder: (context, appData, child) {
         return InkWell(
           splashColor: Colors.grey.shade300,
           onTap: () {
-            if (appData.currentTank != Tank('', '')) {
-              tcInterface.get(appData.currentTank.ip, 'display').then((value) {
-                appData.display = value;
-              });
-            }
+            appData.refreshDisplay();
           },
           child: Container(
             margin: const EdgeInsets.only(top: 20, bottom: 20),
