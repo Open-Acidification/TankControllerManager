@@ -9,10 +9,10 @@ void main() {
     TcInterface.useMock();
   });
 
-  tearDown(() {
-    // Reset so that we no longer have a tank
-    AppData.instance.currentTank = Tank("", "");
-  });
+  // tearDown(() {
+  //   // Reset so that we no longer have a tank
+  //   AppData.instance.currentTank = Tank("", "");
+  // });
 
   testWidgets('Keypad buttons work as expected', (WidgetTester tester) async {
     // Build our app and trigger a frame.
