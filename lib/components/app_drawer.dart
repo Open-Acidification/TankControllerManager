@@ -41,6 +41,17 @@ class AppDrawer extends StatelessWidget {
               child: const Icon(Icons.add),
             ),
           ),
+          Align (
+            alignment: Alignment.topRight,
+            child: FloatingActionButton(
+              onPressed: () {
+                var condemnTank = Tank(nameController.text, ipController.text);
+                appData.removeTank(condemnTank);
+              },
+              tooltip: 'Remove Tank',
+              child: const Icon(Icons.delete_sharp)
+            ),
+          ),
         ],
       ),
     );
