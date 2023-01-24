@@ -15,6 +15,14 @@ void main() async {
     expect(appData.currentIndex, 3);
   });
 
+  test('App delete tank list', () {
+    expect(appData.tankList, []);
+    appData.addTank(Tank('Tank', '192.168.0.1'));
+    expect(appData.tankList[0], Tank('Tank', '192.168.0.1'));
+    appData.removeTank(Tank('Tank', '192.168.0.1'));
+    expect(appData.tankList, []);
+  });
+
   test('App tank list', () {
     expect(appData.tankList, []);
     appData.addTank(Tank('Tank', '192.168.0.1'));
