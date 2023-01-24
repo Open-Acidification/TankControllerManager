@@ -1,5 +1,5 @@
     name: Flutter tests
-    on: [push, workflow_dispatch]
+    on: [pull_request, push, workflow_dispatch]
     jobs:
       Flutter_Tests:
         runs-on: ubuntu-latest
