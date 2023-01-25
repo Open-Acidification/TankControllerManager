@@ -26,8 +26,8 @@ class AppData with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('obj1')) {
       String obj1 = prefs.getString('obj1')!;
-      tankList =
-          List<Tank>.from(jsonDecode(obj1).map((obj1) => Tank.fromJson(obj1)));
+      var x = jsonDecode(obj1).map((obj1) => Tank.fromJson(obj1));
+      _tankList = List<Tank>.from(x);
     }
   }
 
