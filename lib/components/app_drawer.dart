@@ -13,7 +13,6 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Build app drawer");
     var appData = AppData.instance;
     final ipController = TextEditingController();
     final nameController = TextEditingController();
@@ -40,17 +39,6 @@ class AppDrawer extends StatelessWidget {
               },
               tooltip: 'Add Tank',
               child: const Icon(Icons.add),
-            ),
-          ),
-          Align (
-            alignment: Alignment.topRight,
-            child: FloatingActionButton(
-              onPressed: () {
-                appData.removeTank(appData.currentTank);
-                appData.currentTank = Tank("", "");
-              },
-              tooltip: 'Remove Tank',
-              child: const Icon(Icons.delete_sharp)
             ),
           ),
         ],
