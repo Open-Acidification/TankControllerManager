@@ -34,7 +34,6 @@ class AppData with ChangeNotifier {
   Future<void> writeTankList(tankList) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('obj1', jsonEncode(tankList));
-    print(prefs.getString('obj1'));
   }
 
   Future<void> refreshDisplay() async {

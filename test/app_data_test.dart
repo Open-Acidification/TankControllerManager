@@ -21,13 +21,14 @@ void main() async {
     expect(appData.currentIndex, 3);
   });
 
-  test('App add and set current tank list', () {
+  test('App add, set current, and delete tank list', () {
     expect(appData.tankList, []);
     appData.addTank(Tank('Tank', '192.168.0.1'));
     expect(appData.tankList[0], Tank('Tank', '192.168.0.1'));
-    print(appData.tankList);
     appData.currentTank = Tank('Tank', '192.168.0.1');
     expect(appData.currentTank, Tank('Tank', '192.168.0.1'));
+    appData.removeTank(Tank('Tank', '192.168.0.1'));
+    expect(appData.tankList, []);
   });
 
   test('App write tank list', () async {
@@ -35,7 +36,6 @@ void main() async {
     List<Tank> tankList = [Tank('Tank', '192.168.0.1')];
     await appData.writeTankList(tankList);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(prefs.getString('obj1'));
     expect(prefs.getString('obj1'), '[{"name":"Tank","ip":"192.168.0.1"}]');
   });
 
@@ -43,15 +43,8 @@ void main() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<Tank> tankList = [Tank('Tank', '192.168.0.2')];
     prefs.setString('obj1', jsonEncode(tankList));
-
     await appData.readTankList();
     expect(appData.tankList, [Tank('Tank', '192.168.0.2')]);
   });
 
-  test('App delete tank list', () {
-    appData.addTank(Tank('Tank', '192.168.0.1'));
-    expect(appData.tankList[0], Tank('Tank', '192.168.0.1'));
-    appData.removeTank(Tank('Tank', '192.168.0.1'));
-    expect(appData.tankList, []);
-  });
 }
