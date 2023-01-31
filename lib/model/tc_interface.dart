@@ -31,10 +31,10 @@ class TcMockInterface extends TcInterface {
 
 class TcRealInterface extends TcInterface {
   Future<String> get(var ip, var path) async {
-    var uri = 'http://$ip/api/1/$path';
-    final response = await http.get(Uri.parse(uri));
-    final subString = response.body.toString().replaceAll("\r", '');
-    return subString;
+      var uri = 'http://$ip/api/1/$path';
+      final response = await http.get(Uri.parse(uri));
+      final subString = response.body.toString().replaceAll("\r", '');
+      return subString;
   }
 
   Future<String> post(var ip, var path) async {
