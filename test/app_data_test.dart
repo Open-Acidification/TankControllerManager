@@ -25,6 +25,7 @@ void main() async {
     expect(appData.tankList, []);
     appData.addTank(Tank('Tank', '192.168.0.1'));
     expect(appData.tankList[0], Tank('Tank', '192.168.0.1'));
+    print(appData.tankList);
     appData.currentTank = Tank('Tank', '192.168.0.1');
     expect(appData.currentTank, Tank('Tank', '192.168.0.1'));
   });
@@ -32,8 +33,9 @@ void main() async {
   test('App write tank list', () async {
     expect(appData.tankList, []);
     List<Tank> tankList = [Tank('Tank', '192.168.0.1')];
-    appData.writeTankList(tankList);
+    await appData.writeTankList(tankList);
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(prefs.getString('obj1'));
     expect(prefs.getString('obj1'), '[{"name":"Tank","ip":"192.168.0.1"}]');
   });
 
