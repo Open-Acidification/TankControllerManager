@@ -11,7 +11,7 @@ void main() async {
   var appData = AppData.instance;
 
   tearDown(() {
-    // Reset so that we no longer have a tankList
+    // Reset so that we no longer have objects in tankList
     appData.tankList.clear();
   });
 
