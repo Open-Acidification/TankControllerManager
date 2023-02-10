@@ -85,6 +85,12 @@ class AppData with ChangeNotifier {
     writeTankList(tankList);
   }
 
+  void removeTank(tank) {
+    _tankList.remove(tank);
+    notifyListeners();
+    writeTankList(tankList);
+  }
+
   set currentIndex(index) {
     _currentIndex = index;
     notifyListeners();
