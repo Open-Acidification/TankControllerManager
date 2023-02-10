@@ -74,6 +74,12 @@ class AppData with ChangeNotifier {
   }
 
   void addTank(tank) {
+    // try {
+    //   TcInterface.instance.get(tank.ip, 'current');
+    // } catch(e) {
+    //   _information = jsonDecode("{\"Error: Invalid tank IP\":\"\"}");
+    // }
+    //add trycatch above, run below code if it passes
     _tankList.add(tank);
     notifyListeners();
     writeTankList(tankList);
