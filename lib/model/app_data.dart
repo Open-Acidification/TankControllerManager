@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
 
 class AppData with ChangeNotifier {
   static AppData? _instance;
@@ -73,16 +74,45 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
-  void addTank(tank) {
-    // try {
-    //   TcInterface.instance.get(tank.ip, 'current');
-    // } catch(e) {
-    //   _information = jsonDecode("{\"Error: Invalid tank IP\":\"\"}");
-    // }
-    //add trycatch above, run below code if it passes
-    _tankList.add(tank);
-    notifyListeners();
-    writeTankList(tankList);
+  showAlertDialog(String message, BuildContext context) {
+
+    // set up the button
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () { 
+        print("ok");
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(message),
+      content: Text("This is my message."),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  void addTank(tank, BuildContext context) async {
+    try {
+      //make a call to the device to see if it exists
+      //ignore result 
+      await TcInterface.instance.get(tank.ip, 'current');
+      _tankList.add(tank);
+      notifyListeners();
+      writeTankList(tankList);    
+    } catch (e) {
+      showAlertDialog(e.toString(), context);
+    }
   }
 
   void removeTank(tank) {

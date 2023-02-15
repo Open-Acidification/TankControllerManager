@@ -35,7 +35,7 @@ class AppDrawer extends StatelessWidget {
             child: FloatingActionButton(
               onPressed: () {
                 var newTank = Tank(nameController.text, ipController.text);
-                appData.addTank(newTank);
+                appData.addTank(newTank, context);
               },
               tooltip: 'Add Tank',
               child: const Icon(Icons.add),
