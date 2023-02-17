@@ -80,14 +80,14 @@ class AppData with ChangeNotifier {
     Widget okButton = TextButton(
       child: Text("OK"),
       onPressed: () { 
-        print("ok");
+        Navigator.pop(context);
       },
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text(message),
-      content: Text("This is my message."),
+      content: Text("Error connecting to Tank Controller. This is likely due to an incorrect IP address."),
       actions: [
         okButton,
       ],
