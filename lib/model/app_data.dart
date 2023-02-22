@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/tank.dart';
 import 'package:tank_manager/model/tc_interface.dart';
 import 'dart:async';
-import 'package:provider/provider.dart';
 
 class AppData with ChangeNotifier {
   static AppData? _instance;
@@ -74,45 +73,13 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
-  showAlertDialog(String message, BuildContext context) {
-
-    // set up the button
-    Widget okButton = TextButton(
-      child: Text("OK"),
-      onPressed: () { 
-        Navigator.pop(context);
-      },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text(message),
-      content: Text("Error connecting to Tank Controller. This is likely due to an incorrect IP address."),
-      actions: [
-        okButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
-  void addTank(tank, BuildContext context) async {
-    try {
+  Future<void> addTank(tank) async {
       //make a call to the device to see if it exists
       //ignore result 
       await TcInterface.instance.get(tank.ip, 'current');
       _tankList.add(tank);
       notifyListeners();
       writeTankList(tankList);    
-    } catch (e) {
-      showAlertDialog(e.toString(), context);
-    }
   }
 
   void removeTank(tank) {
