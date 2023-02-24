@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 abstract class TcInterface {
   static TcInterface? _instance;
@@ -36,10 +37,12 @@ class TcMockInterface extends TcInterface {
 class TcRealInterface extends TcInterface {
   Future<String> get(String ip, String path) async {
     var uri = 'http://$ip/api/1/$path';
-    final response = await http.get(Uri.parse(uri)); 
-    if (response.statusCode != 200) {
-      throw("HTTP response not code 200");
+    final response = await http.get(Uri.parse(uri)).timeout(const Duration(seconds: 5),
+    onTimeout: () {
+      throw(Exception("HTTP Timeout"));
     }
+    ); 
+    print("Made it past timeout");
     final subString = response.body.toString().replaceAll("\r", '');
     return subString;
   }

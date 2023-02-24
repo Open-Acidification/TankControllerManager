@@ -65,7 +65,8 @@ class AppDrawer extends StatelessWidget {
                 var newTank = Tank(nameController.text, ipController.text);
                 try{
                   appData.addTank(newTank);     
-                } catch (e) {
+                } on Exception catch (e) {
+                  print(e);
                   showAlertDialog(e.toString(), context);
                 }
               },
