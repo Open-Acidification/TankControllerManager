@@ -61,12 +61,11 @@ class AppDrawer extends StatelessWidget {
           Align(
             alignment: Alignment.topRight,
             child: FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 var newTank = Tank(nameController.text, ipController.text);
                 try{
-                  appData.addTank(newTank);     
-                } on Exception catch (e) {
-                  print(e);
+                  await appData.addTank(newTank);     
+                } catch (e) {
                   showAlertDialog(e.toString(), context);
                 }
               },

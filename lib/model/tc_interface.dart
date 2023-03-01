@@ -37,19 +37,19 @@ class TcMockInterface extends TcInterface {
 class TcRealInterface extends TcInterface {
   Future<String> get(String ip, String path) async {
     var uri = 'http://$ip/api/1/$path';
-    final response = await http.get(Uri.parse(uri)).timeout(const Duration(seconds: 5),
-    onTimeout: () {
-      throw(Exception("HTTP Timeout"));
+    var future = http.get(Uri.parse(uri));
+    var response = await future.timeout(const Duration(seconds: 5));
+    if (response.statusCode != 200) {
+      throw("HTTP response not code 200");
     }
-    ); 
-    print("Made it past timeout");
     final subString = response.body.toString().replaceAll("\r", '');
     return subString;
   }
 
   Future<String> post(var ip, var path) async {
     var uri = 'http://$ip/api/1/$path';
-    final response = await http.post(Uri.parse(uri));
+    final future = http.post(Uri.parse(uri));
+    var response = await future.timeout(const Duration(seconds: 5));
     if (response.statusCode != 200) {
       throw("HTTP response not code 200");
     }
