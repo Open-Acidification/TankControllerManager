@@ -79,7 +79,7 @@ class AppData with ChangeNotifier {
     await TcInterface.instance.get(tank.ip, 'current');
     _tankList.add(tank);
     notifyListeners();
-    writeTankList(tankList);    
+    writeTankList(tankList);
   }
 
   void removeTank(tank) {
