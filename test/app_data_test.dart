@@ -1,11 +1,17 @@
 import 'dart:convert';
+import 'package:tank_manager/model/tc_interface.dart';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tank_manager/model/app_data.dart';
 import 'package:tank_manager/model/tank.dart';
+import 'package:mockito/mockito.dart';
+
+class MockBuildContext extends Mock implements BuildContext {}
 
 void main() async {
+  TcInterface.useMock();
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({});
   var appData = AppData.instance;
@@ -21,9 +27,20 @@ void main() async {
     expect(appData.currentIndex, 3);
   });
 
-  test('App add, set current, and delete tank list', () {
+testWidgets('App Invalid IP', (WidgetTester tester) async {
+  expect(appData.tankList, []);
+  bool flag = false;
+  try {
+    await appData.addTank(Tank('Tank', '127.0.0.1'));
+  } catch (e) {
+    flag = true;
+  }
+  expect(flag, true);
+});
+
+  test('App add, set current, and delete tank list', () async {
     expect(appData.tankList, []);
-    appData.addTank(Tank('Tank', '192.168.0.1'));
+    await appData.addTank(Tank('Tank', '192.168.0.1'));
     expect(appData.tankList[0], Tank('Tank', '192.168.0.1'));
     appData.currentTank = Tank('Tank', '192.168.0.1');
     expect(appData.currentTank, Tank('Tank', '192.168.0.1'));
